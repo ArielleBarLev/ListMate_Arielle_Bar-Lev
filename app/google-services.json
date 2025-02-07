@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "605026093551",
+    "project_id": "listmate-arielle-bar-lev",
+    "storage_bucket": "listmate-arielle-bar-lev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:605026093551:android:bb6bb7a0931f83f55fce1a",
+        "android_client_info": {
+          "package_name": "arielle.barlev.listmate_arielle_bar_lev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKtXmw4q-WFGOFYL0w93GCM2QfKXd3FHw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
