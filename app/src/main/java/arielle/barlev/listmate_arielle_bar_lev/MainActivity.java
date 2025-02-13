@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button send;
 
-    private FirebaseAuth firebase_auth;
+    Firebase_Helper helper;
 
     private void init_component() {
         email = findViewById(R.id.email);
@@ -33,21 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         send = findViewById(R.id.send);
 
-        firebase_auth =FirebaseAuth.getInstance();
-    }
-
-    private void sign_up(String email, String password) {
-        firebase_auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MainActivity.this, "Failed", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+        helper = new Firebase_Helper();
     }
 
     @Override
@@ -63,16 +49,7 @@ public class MainActivity extends AppCompatActivity {
                 String email_content = email.getText().toString();
                 String password_content = password.getText().toString();
 
-                if (email_content.isEmpty() || password_content.isEmpty()) {
-                    Toast.makeText(MainActivity.this, "Fields are empty", Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                if (password_content.length() < 6) {
-                    Toast.makeText(MainActivity.this, "Password to short", Toast.LENGTH_LONG).show();
-                }
-
-                sign_up(email_content, password_content);
+                helper.sign_up(MainActivity.this, email_content, password_content);
             }
         });
     }
