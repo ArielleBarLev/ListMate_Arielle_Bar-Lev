@@ -23,17 +23,21 @@ public class MainActivity extends AppCompatActivity {
     private EditText email;
     private EditText password;
 
-    private Button send;
+    private Button sign_up;
+    private Button login;
 
-    Firebase_Helper helper;
+    private Firebase_Helper helper;
+    private Utilities utilities;
 
     private void init_component() {
         email = findViewById(R.id.email);
         password = findViewById(R.id.password);
 
-        send = findViewById(R.id.send);
+        sign_up = findViewById(R.id.sign_up);
+        login = findViewById(R.id.login);
 
         helper = new Firebase_Helper();
+        utilities = new Utilities();
     }
 
     @Override
@@ -43,13 +47,33 @@ public class MainActivity extends AppCompatActivity {
 
         init_component();
 
-        send.setOnClickListener(new View.OnClickListener() {
+        sign_up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String email_content = email.getText().toString();
                 String password_content = password.getText().toString();
 
+                if (email_content.isEmpty() || password_content.isEmpty()) {
+                    utilities.make_snackbar(MainActivity.this, "Fields are empty");
+                    return;
+                }
+
                 helper.sign_up(MainActivity.this, email_content, password_content);
+            }
+        });
+
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String email_content = email.getText().toString();
+                String password_content = password.getText().toString();
+
+                if (email_content.isEmpty() || password_content.isEmpty()) {
+                    utilities.make_snackbar(MainActivity.this, "Fields are empty");
+                    return;
+                }
+
+                helper.login(MainActivity.this, email_content, password_content);
             }
         });
     }
