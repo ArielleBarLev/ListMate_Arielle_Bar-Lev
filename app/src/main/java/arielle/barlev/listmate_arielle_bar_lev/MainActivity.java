@@ -29,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Button sign_up;
     private Button login;
-    private Button temp;
 
     private Firebase_Helper helper;
     private Utilities utilities;
@@ -42,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
 
         sign_up = findViewById(R.id.sign_up);
         login = findViewById(R.id.login);
-        temp = findViewById(R.id.temp);
 
         helper = new Firebase_Helper(MainActivity.this);
         utilities = new Utilities();
@@ -72,8 +70,11 @@ public class MainActivity extends AppCompatActivity {
                 sign_up_future.thenAccept(uid -> {
                     Uid = uid;
                     utilities.make_snackbar(MainActivity.this, Uid);
+
+                    Intent intent = new Intent(MainActivity.this, Add_List.class);
+                    intent.putExtra("Uid", Uid);
+                    startActivity(intent);
                 }).exceptionally(ex -> {
-                    // Handle the error here
                     Log.e("LoginActivity", "Login error: " + ex.getMessage());
                     utilities.make_snackbar(MainActivity.this, ex.getMessage());
                     return null;
@@ -99,21 +100,16 @@ public class MainActivity extends AppCompatActivity {
                 login_future.thenAccept(uid -> {
                     Uid = uid;
                     utilities.make_snackbar(MainActivity.this, "success");
+
+                    Intent intent = new Intent(MainActivity.this, Add_List.class);
+                    intent.putExtra("Uid", Uid);
+                    startActivity(intent);
                 }).exceptionally(ex -> {
-                    // Handle the error here
                     Log.e("LoginActivity", "Login error: " + ex.getMessage());
                     utilities.make_snackbar(MainActivity.this, ex.getMessage());
                     return null;
                 });
 
-            }
-        });
-
-        temp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), Add_List.class);
-                startActivity(intent);
             }
         });
     }

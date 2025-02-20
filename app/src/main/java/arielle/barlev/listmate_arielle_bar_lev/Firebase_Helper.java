@@ -29,6 +29,20 @@ public class Firebase_Helper {
     private FirebaseAuth firebase_auth = FirebaseAuth.getInstance();
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
 
+    private void add_user_realtime_database() {
+        DatabaseReference users_reference = database.getReference("users");
+
+        String uid = firebase_auth.getCurrentUser().getUid();
+
+        users_reference.child(uid).setValue(false)
+                .addOnSuccessListener(aVoid -> {
+                    utilities.make_snackbar(_context, "succeed");
+                })
+                .addOnFailureListener(e -> {
+                    utilities.make_snackbar(_context, "fail");
+                });
+    }
+
     public Firebase_Helper(Context context) {
         _context = context;
     }
@@ -72,17 +86,15 @@ public class Firebase_Helper {
         return future;
     }
 
-    public void add_user_realtime_database() {
+    public void create_list(String Uid, String name) {
         DatabaseReference users_reference = database.getReference("users");
 
-        String uid = firebase_auth.getCurrentUser().getUid();
-
-        users_reference.child(uid).setValue(false)
-            .addOnSuccessListener(aVoid -> {
-                utilities.make_snackbar(_context, "succeed");
-            })
-            .addOnFailureListener(e -> {
-                utilities.make_snackbar(_context, "fail");
-            });
+        users_reference.child(Uid).child(name).setValue(false)
+                .addOnSuccessListener(aVoid -> {
+                    utilities.make_snackbar(_context, "succeed");
+                })
+                .addOnFailureListener(e -> {
+                    utilities.make_snackbar(_context, "fail");
+                });
     }
 }
