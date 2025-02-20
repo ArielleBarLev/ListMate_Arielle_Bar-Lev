@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "605026093551",
+    "firebase_url": "https://listmate-arielle-bar-lev-default-rtdb.firebaseio.com",
     "project_id": "listmate-arielle-bar-lev",
     "storage_bucket": "listmate-arielle-bar-lev.firebasestorage.app"
   },

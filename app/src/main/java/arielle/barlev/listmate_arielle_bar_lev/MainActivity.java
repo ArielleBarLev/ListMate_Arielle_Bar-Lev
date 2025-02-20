@@ -1,5 +1,6 @@
 package arielle.barlev.listmate_arielle_bar_lev;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button sign_up;
     private Button login;
+    private Button temp;
 
     private Firebase_Helper helper;
     private Utilities utilities;
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
         sign_up = findViewById(R.id.sign_up);
         login = findViewById(R.id.login);
+        temp = findViewById(R.id.temp);
 
         helper = new Firebase_Helper();
         utilities = new Utilities();
@@ -74,6 +77,14 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 helper.login(MainActivity.this, email_content, password_content);
+            }
+        });
+
+        temp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), Add_List.class);
+                startActivity(intent);
             }
         });
     }
