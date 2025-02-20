@@ -18,88 +18,71 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class Firebase_Helper {
+
+    private Context _context;
 
     private Utilities utilities = new Utilities();
 
     private FirebaseAuth firebase_auth = FirebaseAuth.getInstance();
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-    public void sign_up(Context context, String email, String password) {
-        firebase_auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if(task.isSuccessful()) {
-                    utilities.make_snackbar(context, "succeed");
-
-                    add_user_realtime_database(context);
-                } else {
-                    Exception exception = task.getException();
-                    String error_message = "Sign-up failed: ";
-
-                    if (exception != null) {
-                        if (exception instanceof FirebaseAuthException) {
-                            FirebaseAuthException authException = (FirebaseAuthException) exception;
-                            error_message += authException.getMessage();
-                        } else {
-                            error_message += exception.getMessage();
-                        }
-                    } else {
-                        error_message += "An unknown error occurred.";
-                    }
-
-                    utilities.make_snackbar(context, error_message);
-                    Log.e("Firebase_Helper", error_message);
-                }
-            }
-        });
+    public Firebase_Helper(Context context) {
+        _context = context;
     }
 
-    public void login(Context context, String email, String password) {
+    public CompletableFuture<String> sign_up(String email, String password) {
+        CompletableFuture<String> future = new CompletableFuture<>();
+
+        firebase_auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = firebase_auth.getCurrentUser();
+                        String uid = user.getUid();
+                        future.complete(uid);
+                        add_user_realtime_database();
+                    } else {
+                        Exception exception = task.getException();
+                        String errorMessage = "Login failed: " + (exception != null ? exception.getMessage() : "Unknown error");
+                        future.completeExceptionally(new Exception(errorMessage));
+                    }
+                });
+
+        return future;
+    }
+
+    public CompletableFuture<String> login(String email, String password) {
+        CompletableFuture<String> future = new CompletableFuture<>();
 
         firebase_auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener(new OnCompleteListener<AuthResult>() { // Use addOnCompleteListener
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if(task.isSuccessful()) {
-                    utilities.make_snackbar(context, "succeed");
-                    add_user_realtime_database(context);
-                } else {
-                    Exception exception = task.getException();
-                    String error_message = "Login failed: ";
-
-                    if (exception != null) {
-                        if (exception instanceof FirebaseAuthException) {
-                            FirebaseAuthException authException = (FirebaseAuthException) exception;
-                            error_message += authException.getMessage();
-                        } else {
-                            error_message += exception.getMessage();
-                        }
-                    } else {
-                        error_message += "An unknown error occurred.";
-                    }
-
-                    utilities.make_snackbar(context, error_message);
-                    Log.e("Firebase_Helper", error_message);
-                }
+            .addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                FirebaseUser user = firebase_auth.getCurrentUser();
+                String uid = user.getUid();
+                future.complete(uid);
+            } else {
+                Exception exception = task.getException();
+                String errorMessage = "Login failed: " + (exception != null ? exception.getMessage() : "Unknown error");
+                future.completeExceptionally(new Exception(errorMessage));
             }
         });
 
+        return future;
     }
 
-    public void add_user_realtime_database(Context context) {
+    public void add_user_realtime_database() {
         DatabaseReference users_reference = database.getReference("users");
 
         String uid = firebase_auth.getCurrentUser().getUid();
 
         users_reference.child(uid).setValue(false)
             .addOnSuccessListener(aVoid -> {
-                utilities.make_snackbar(context, "succeed");
+                utilities.make_snackbar(_context, "succeed");
             })
             .addOnFailureListener(e -> {
-                utilities.make_snackbar(context, "fail");
+                utilities.make_snackbar(_context, "fail");
             });
     }
 }

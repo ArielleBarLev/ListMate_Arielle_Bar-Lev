@@ -2,6 +2,7 @@ package arielle.barlev.listmate_arielle_bar_lev;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,6 +20,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.concurrent.CompletableFuture;
+
 public class MainActivity extends AppCompatActivity {
 
     private EditText email;
@@ -31,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
     private Firebase_Helper helper;
     private Utilities utilities;
 
+    private String Uid;
+
     private void init_component() {
         email = findViewById(R.id.email);
         password = findViewById(R.id.password);
@@ -39,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         login = findViewById(R.id.login);
         temp = findViewById(R.id.temp);
 
-        helper = new Firebase_Helper();
+        helper = new Firebase_Helper(MainActivity.this);
         utilities = new Utilities();
     }
 
@@ -53,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         sign_up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 String email_content = email.getText().toString();
                 String password_content = password.getText().toString();
 
@@ -61,13 +67,25 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                helper.sign_up(MainActivity.this, email_content, password_content);
+                CompletableFuture<String> sign_up_future = helper.sign_up(email_content, password_content);
+
+                sign_up_future.thenAccept(uid -> {
+                    Uid = uid;
+                    utilities.make_snackbar(MainActivity.this, Uid);
+                }).exceptionally(ex -> {
+                    // Handle the error here
+                    Log.e("LoginActivity", "Login error: " + ex.getMessage());
+                    utilities.make_snackbar(MainActivity.this, ex.getMessage());
+                    return null;
+                });
+
             }
         });
 
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 String email_content = email.getText().toString();
                 String password_content = password.getText().toString();
 
@@ -76,7 +94,18 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                helper.login(MainActivity.this, email_content, password_content);
+                CompletableFuture<String> login_future = helper.login(email_content, password_content);
+
+                login_future.thenAccept(uid -> {
+                    Uid = uid;
+                    utilities.make_snackbar(MainActivity.this, "success");
+                }).exceptionally(ex -> {
+                    // Handle the error here
+                    Log.e("LoginActivity", "Login error: " + ex.getMessage());
+                    utilities.make_snackbar(MainActivity.this, ex.getMessage());
+                    return null;
+                });
+
             }
         });
 
