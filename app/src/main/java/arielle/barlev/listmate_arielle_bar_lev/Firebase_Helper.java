@@ -26,13 +26,13 @@ public class Firebase_Helper {
 
     private Utilities utilities = new Utilities();
 
-    private FirebaseAuth firebase_auth = FirebaseAuth.getInstance();
-    private FirebaseDatabase database = FirebaseDatabase.getInstance();
+    private FirebaseAuth _firebase_auth;
+    private FirebaseDatabase _database;
 
     private void add_user_realtime_database() {
-        DatabaseReference users_reference = database.getReference("users");
+        DatabaseReference users_reference = _database.getReference("users");
 
-        String uid = firebase_auth.getCurrentUser().getUid();
+        String uid = _firebase_auth.getCurrentUser().getUid();
 
         users_reference.child(uid).setValue(false)
                 .addOnSuccessListener(aVoid -> {
@@ -45,15 +45,17 @@ public class Firebase_Helper {
 
     public Firebase_Helper(Context context) {
         _context = context;
+        _firebase_auth = FirebaseAuth.getInstance();
+        _database = FirebaseDatabase.getInstance();
     }
 
     public CompletableFuture<String> sign_up(String email, String password) {
         CompletableFuture<String> future = new CompletableFuture<>();
 
-        firebase_auth.createUserWithEmailAndPassword(email, password)
+        _firebase_auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        FirebaseUser user = firebase_auth.getCurrentUser();
+                        FirebaseUser user = _firebase_auth.getCurrentUser();
                         String uid = user.getUid();
                         future.complete(uid);
                         add_user_realtime_database();
@@ -70,10 +72,10 @@ public class Firebase_Helper {
     public CompletableFuture<String> login(String email, String password) {
         CompletableFuture<String> future = new CompletableFuture<>();
 
-        firebase_auth.signInWithEmailAndPassword(email, password)
+        _firebase_auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                FirebaseUser user = firebase_auth.getCurrentUser();
+                FirebaseUser user = _firebase_auth.getCurrentUser();
                 String uid = user.getUid();
                 future.complete(uid);
             } else {
@@ -87,7 +89,7 @@ public class Firebase_Helper {
     }
 
     public void create_list(String Uid, String name) {
-        DatabaseReference users_reference = database.getReference("users");
+        DatabaseReference users_reference = _database.getReference("users");
 
         users_reference.child(Uid).child(name).setValue(false)
                 .addOnSuccessListener(aVoid -> {

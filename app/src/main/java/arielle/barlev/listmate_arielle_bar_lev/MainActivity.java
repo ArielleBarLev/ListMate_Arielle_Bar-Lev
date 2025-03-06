@@ -33,8 +33,6 @@ public class MainActivity extends AppCompatActivity {
     private Firebase_Helper helper;
     private Utilities utilities;
 
-    private String Uid;
-
     private void init_component() {
         email = findViewById(R.id.email);
         password = findViewById(R.id.password);
@@ -68,11 +66,10 @@ public class MainActivity extends AppCompatActivity {
                 CompletableFuture<String> sign_up_future = helper.sign_up(email_content, password_content);
 
                 sign_up_future.thenAccept(uid -> {
-                    Uid = uid;
-                    utilities.make_snackbar(MainActivity.this, Uid);
+                    utilities.make_snackbar(MainActivity.this, uid);
 
                     Intent intent = new Intent(MainActivity.this, Add_List.class);
-                    intent.putExtra("Uid", Uid);
+                    intent.putExtra("Uid", uid);
                     startActivity(intent);
                 }).exceptionally(ex -> {
                     Log.e("LoginActivity", "Login error: " + ex.getMessage());
@@ -98,11 +95,10 @@ public class MainActivity extends AppCompatActivity {
                 CompletableFuture<String> login_future = helper.login(email_content, password_content);
 
                 login_future.thenAccept(uid -> {
-                    Uid = uid;
                     utilities.make_snackbar(MainActivity.this, "success");
 
                     Intent intent = new Intent(MainActivity.this, Add_List.class);
-                    intent.putExtra("Uid", Uid);
+                    intent.putExtra("Uid", uid);
                     startActivity(intent);
                 }).exceptionally(ex -> {
                     Log.e("LoginActivity", "Login error: " + ex.getMessage());
