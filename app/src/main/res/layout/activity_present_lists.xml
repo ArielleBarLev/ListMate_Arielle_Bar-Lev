@@ -8,45 +8,37 @@
     tools:context=".Present_Lists">
 
     <TextView
-        android:id="@+id/users"
+        android:id="@+id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="18dp"
+        android:layout_marginBottom="47dp"
         android:text="Your Lists:"
-        app:layout_constraintBottom_toTopOf="@+id/scroll_view"
+        app:layout_constraintBottom_toTopOf="@+id/lists_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ScrollView
-        android:id="@+id/scroll_view"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/lists_layout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="13dp"
-        android:layout_marginEnd="13dp"
-        android:layout_marginBottom="18dp"
+        android:layout_marginBottom="109dp"
+        android:layout_weight="1"
         app:layout_constraintBottom_toTopOf="@+id/add_list"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/users">
-
-        <LinearLayout
-            android:id="@+id/users_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-    </ScrollView>
+        app:layout_constraintTop_toBottomOf="@+id/title" />
 
     <Button
         android:id="@+id/add_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="28dp"
+        android:layout_marginBottom="298dp"
         android:text="Add List"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/scroll_view" />
+        app:layout_constraintTop_toBottomOf="@+id/lists_layout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

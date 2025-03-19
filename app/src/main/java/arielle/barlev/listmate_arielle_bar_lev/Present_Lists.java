@@ -1,5 +1,7 @@
 package arielle.barlev.listmate_arielle_bar_lev;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.Intent;
 import android.health.connect.datatypes.units.Pressure;
 import android.os.Bundle;
@@ -16,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,24 +32,27 @@ import java.util.List;
 
 public class Present_Lists extends AppCompatActivity {
 
-    private LinearLayout users_layout;
-
     private Button add_list;
 
     private DatabaseReference database_reference;
 
     private String Uid;
 
+    private RecyclerView lists_layout;
+    private List<String> lists_names;
+
     private Firebase_Helper helper;
+    private Lists_Names_Adapter adapter;
     private Utilities utilities;
 
     private void init() {
-        users_layout = findViewById(R.id.users_layout);
-
+        lists_layout = findViewById(R.id.lists_layout);
         add_list = findViewById(R.id.add_list);
 
         Intent intent = getIntent();
         Uid = intent.getStringExtra("Uid");
+
+        lists_names = new ArrayList<>();
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         database_reference = database.getReference("users");
@@ -61,6 +68,22 @@ public class Present_Lists extends AppCompatActivity {
 
         init();
 
+        LinearLayoutManager layout_manager = new LinearLayoutManager(this);
+        lists_layout.setLayoutManager(layout_manager);
+
+        adapter = new Lists_Names_Adapter(lists_names, new Lists_Names_Adapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                if (0 <= position && position < lists_names.size()) {
+                    String list_name = lists_names.get(position);
+                    utilities.make_snackbar(Present_Lists.this, "Clicked: " + list_name);
+                } else {
+                    utilities.make_snackbar(Present_Lists.this, "Error: Invalid list item clicked.");
+                }
+            }
+        });
+        lists_layout.setAdapter(adapter);
+
         display_data();
 
         add_list.setOnClickListener(new View.OnClickListener() {
@@ -74,20 +97,16 @@ public class Present_Lists extends AppCompatActivity {
     }
 
     private void display_data() {
-        users_layout.removeAllViews();
+        lists_names.clear();
 
-        helper.users_lists(Uid).thenAccept(listNames -> {
-            if (listNames.isEmpty()) {
+        helper.users_lists(Uid).thenAccept(retrievedListNames -> {
+            if (retrievedListNames.isEmpty()) {
                 utilities.make_snackbar(Present_Lists.this, "No lists found for this user.");
             } else {
-                for (String listName : listNames) {
-                    TextView listTextView = new TextView(Present_Lists.this);
-                    listTextView.setText(listName);
-                    users_layout.addView(listTextView);
-                }
+                lists_names.addAll(retrievedListNames);
+                adapter.notifyDataSetChanged();
             }
-        })
-        .exceptionally(e -> {
+        }).exceptionally(e -> {
             utilities.make_snackbar(Present_Lists.this, "Failed to fetch lists: " + e.getMessage());
             return null;
         });
