@@ -13,10 +13,15 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -98,5 +103,34 @@ public class Firebase_Helper {
                 .addOnFailureListener(e -> {
                     utilities.make_snackbar(_context, "fail");
                 });
+    }
+
+    public CompletableFuture<List<String>> users_lists(String Uid) {
+        CompletableFuture<List<String>> future = new CompletableFuture<>();
+        DatabaseReference user_reference = _database.getReference("users").child(Uid);
+
+        user_reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    List<String> list_names = new ArrayList<>();
+                    for (DataSnapshot listSnapshot : snapshot.getChildren()) {
+                        String listName = listSnapshot.getKey();
+                        if (listName != null) {
+                            list_names.add(listName);
+                        }
+                    }
+                    future.complete(list_names);
+                } else {
+                    future.complete(new ArrayList<>());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                future.completeExceptionally(new Exception("Failed to fetch lists: " + error.getMessage()));
+            }
+        });
+        return future;
     }
 }

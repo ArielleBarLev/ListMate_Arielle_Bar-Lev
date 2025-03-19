@@ -1,6 +1,7 @@
 package arielle.barlev.listmate_arielle_bar_lev;
 
 import android.content.Intent;
+import android.health.connect.datatypes.units.Pressure;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -35,6 +36,7 @@ public class Present_Lists extends AppCompatActivity {
 
     private String Uid;
 
+    private Firebase_Helper helper;
     private Utilities utilities;
 
     private void init() {
@@ -48,6 +50,7 @@ public class Present_Lists extends AppCompatActivity {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         database_reference = database.getReference("users");
 
+        helper = new Firebase_Helper(Present_Lists.this);
         utilities = new Utilities();
     }
 
@@ -71,53 +74,22 @@ public class Present_Lists extends AppCompatActivity {
     }
 
     private void display_data() {
-        DatabaseReference user_reference = database_reference.child(Uid);
+        users_layout.removeAllViews();
 
-        user_reference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    user_reference.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot data_snapshot) {
-                            users_layout.removeAllViews();
-                            if (data_snapshot.exists()) {
-                                List<String> list_names = new ArrayList<>();
-                                for (DataSnapshot listSnapshot : data_snapshot.getChildren()) {
-                                    String listName = listSnapshot.getKey();
-                                    if (listName != null) {
-                                        list_names.add(listName);
-                                    }
-                                }
-                                
-                                if (list_names.isEmpty()) {
-                                    utilities.make_snackbar(Present_Lists.this, "No lists found for this user.");
-                                } else {
-                                    for (String listName : list_names) {
-                                        TextView listTextView = new TextView(Present_Lists.this);
-                                        listTextView.setText(listName);
-                                        users_layout.addView(listTextView);
-                                    }
-                                }
-                            } else {
-                                utilities.make_snackbar(Present_Lists.this, "No lists found for this user.");
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            utilities.make_snackbar(Present_Lists.this, "Firebase error: " + error.getMessage());
-                        }
-                    });
-                } else {
-                    utilities.make_snackbar(Present_Lists.this, "User not found");
+        helper.users_lists(Uid).thenAccept(listNames -> {
+            if (listNames.isEmpty()) {
+                utilities.make_snackbar(Present_Lists.this, "No lists found for this user.");
+            } else {
+                for (String listName : listNames) {
+                    TextView listTextView = new TextView(Present_Lists.this);
+                    listTextView.setText(listName);
+                    users_layout.addView(listTextView);
                 }
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                utilities.make_snackbar(Present_Lists.this, "Firebase error: " + error.getMessage());
-            }
+        })
+        .exceptionally(e -> {
+            utilities.make_snackbar(Present_Lists.this, "Failed to fetch lists: " + e.getMessage());
+            return null;
         });
     }
 }
