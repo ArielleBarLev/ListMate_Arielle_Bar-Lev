@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
                 sign_up_future.thenAccept(uid -> {
                     utilities.make_snackbar(MainActivity.this, uid);
 
-                    Intent intent = new Intent(MainActivity.this, Add_List.class);
+                    Intent intent = new Intent(MainActivity.this, Present_Lists.class);
                     intent.putExtra("Uid", uid);
                     startActivity(intent);
                 }).exceptionally(ex -> {
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                 login_future.thenAccept(uid -> {
                     utilities.make_snackbar(MainActivity.this, "success");
 
-                    Intent intent = new Intent(MainActivity.this, Add_List.class);
+                    Intent intent = new Intent(MainActivity.this, Present_Lists.class);
                     intent.putExtra("Uid", uid);
                     startActivity(intent);
                 }).exceptionally(ex -> {

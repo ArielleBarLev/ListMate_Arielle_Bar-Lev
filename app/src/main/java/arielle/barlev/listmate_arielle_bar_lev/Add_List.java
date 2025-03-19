@@ -52,6 +52,10 @@ public class Add_List extends AppCompatActivity {
                 String list_name_content = list_name.getText().toString();
 
                 helper.create_list(Uid, list_name_content);
+
+                Intent intent = new Intent(Add_List.this, Present_Lists.class);
+                intent.putExtra("Uid", Uid);
+                startActivity(intent);
             }
         });
     }
