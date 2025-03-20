@@ -144,7 +144,7 @@ public class Firebase_Helper {
     }
 
     /*
-        A function to return all user's lists
+        A function to return all user's lists.
         Input: user's id
         Return value: user's lists
      */
@@ -166,6 +166,41 @@ public class Firebase_Helper {
                     future.complete(list_names);
                 } else {
                     future.complete(new ArrayList<>());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                future.completeExceptionally(new Exception("Failed to fetch lists: " + error.getMessage()));
+            }
+        });
+        return future;
+    }
+
+    /*
+        A function to return all list's items.
+        Input: user's id, list's name
+        Return value: list's items
+     */
+    public CompletableFuture<Map<String, Boolean>> lists_items(String Uid, String list_name) {
+        CompletableFuture<Map<String, Boolean>> future = new CompletableFuture<>();
+        DatabaseReference user_reference = _database.getReference("users").child(Uid).child(list_name);
+
+        user_reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Map<String, Boolean> items = new HashMap<>();
+                    for (DataSnapshot itemSnapshot : snapshot.getChildren()) {
+                        String item_title = itemSnapshot.getKey();
+                        Boolean item_value = itemSnapshot.getValue(Boolean.class);
+                        if (item_title != null && item_value != null) {
+                            items.put(item_title, item_value);
+                        }
+                    }
+                    future.complete(items);
+                } else {
+                    future.complete(new HashMap<>());
                 }
             }
 

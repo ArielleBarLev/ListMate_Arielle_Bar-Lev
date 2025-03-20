@@ -58,8 +58,9 @@ public class Add_Item extends AppCompatActivity {
 
                 helper.add_item(Uid, list_name, item_content);
 
-                Intent intent = new Intent(Add_Item.this, Present_Lists.class);
+                Intent intent = new Intent(Add_Item.this, Present_Items.class);
                 intent.putExtra("Uid", Uid);
+                intent.putExtra("list_name", list_name);
                 startActivity(intent);
             }
         });
