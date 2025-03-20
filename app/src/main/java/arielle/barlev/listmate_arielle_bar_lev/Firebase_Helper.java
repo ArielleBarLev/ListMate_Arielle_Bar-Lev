@@ -127,6 +127,23 @@ public class Firebase_Helper {
     }
 
     /*
+        A function to add an item to a list.
+        Input: user's id, list's name, item
+        Return value: none
+     */
+    public void add_item(String Uid, String list_name, String item) {
+        DatabaseReference users_reference = _database.getReference("users");
+
+        users_reference.child(Uid).child(list_name).child(item).setValue(false)
+                .addOnSuccessListener(aVoid -> {
+                    utilities.make_snackbar(_context, "succeed");
+                })
+                .addOnFailureListener(e -> {
+                    utilities.make_snackbar(_context, "fail");
+                });
+    }
+
+    /*
         A function to return all user's lists
         Input: user's id
         Return value: user's lists

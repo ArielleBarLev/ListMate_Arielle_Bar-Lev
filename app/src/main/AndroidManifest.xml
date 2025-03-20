@@ -13,6 +13,9 @@
         android:theme="@style/Theme.ListMate_Arielle_BarLev"
         tools:targetApi="31">
         <activity
+            android:name=".Add_Item"
+            android:exported="false" />
+        <activity
             android:name=".Present_Lists"
             android:exported="false" />
         <activity

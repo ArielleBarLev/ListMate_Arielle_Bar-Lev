@@ -72,6 +72,10 @@ public class Present_Lists extends AppCompatActivity {
                 if (0 <= position && position < lists_names.size()) {
                     String list_name = lists_names.get(position);
                     utilities.make_snackbar(Present_Lists.this, "Clicked: " + list_name);
+                    Intent intent = new Intent(Present_Lists.this, Add_Item.class);
+                    intent.putExtra("Uid", Uid);
+                    intent.putExtra("list_name", list_name);
+                    startActivity(intent);
                 } else {
                     utilities.make_snackbar(Present_Lists.this, "Error: Invalid list item clicked.");
                 }

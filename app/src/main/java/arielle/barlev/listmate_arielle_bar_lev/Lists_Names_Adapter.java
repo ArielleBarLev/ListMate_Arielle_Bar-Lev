@@ -20,7 +20,7 @@ public class Lists_Names_Adapter extends RecyclerView.Adapter<Lists_Names_Adapte
     }
 
     public Lists_Names_Adapter(List<String> listNames, OnItemClickListener listener) {
-        //Log.d(TAG, "Lists_Names_Adapter constructor called");
+        Log.d(TAG, "Lists_Names_Adapter constructor called");
         this.listNames = listNames;
         this.listener = listener;
     }
