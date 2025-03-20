@@ -34,6 +34,11 @@ public class Firebase_Helper {
     private FirebaseAuth _firebase_auth;
     private FirebaseDatabase _database;
 
+    /*
+        A function to insert user's id to the realtime database.
+        Input: none
+        Return value: none
+     */
     private void add_user_realtime_database() {
         DatabaseReference users_reference = _database.getReference("users");
 
@@ -48,12 +53,18 @@ public class Firebase_Helper {
                 });
     }
 
+    //Constructor
     public Firebase_Helper(Context context) {
         _context = context;
         _firebase_auth = FirebaseAuth.getInstance();
         _database = FirebaseDatabase.getInstance();
     }
 
+    /*
+        A function to register a new user to the auth database.
+        Input: email, password
+        Return value: user's id
+     */
     public CompletableFuture<String> sign_up(String email, String password) {
         CompletableFuture<String> future = new CompletableFuture<>();
 
@@ -74,6 +85,11 @@ public class Firebase_Helper {
         return future;
     }
 
+    /*
+        A function to login user.
+        Input: email, password
+        Return value: user's id
+     */
     public CompletableFuture<String> login(String email, String password) {
         CompletableFuture<String> future = new CompletableFuture<>();
 
@@ -93,6 +109,11 @@ public class Firebase_Helper {
         return future;
     }
 
+    /*
+        A function to create new list.
+        Input: user's id, list's name
+        Return value: none
+     */
     public void create_list(String Uid, String name) {
         DatabaseReference users_reference = _database.getReference("users");
 
@@ -105,6 +126,11 @@ public class Firebase_Helper {
                 });
     }
 
+    /*
+        A function to return all user's lists
+        Input: user's id
+        Return value: user's lists
+     */
     public CompletableFuture<List<String>> users_lists(String Uid) {
         CompletableFuture<List<String>> future = new CompletableFuture<>();
         DatabaseReference user_reference = _database.getReference("users").child(Uid);

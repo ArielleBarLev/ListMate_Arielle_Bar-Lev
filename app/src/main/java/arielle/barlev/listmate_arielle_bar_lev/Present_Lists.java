@@ -34,8 +34,6 @@ public class Present_Lists extends AppCompatActivity {
 
     private Button add_list;
 
-    private DatabaseReference database_reference;
-
     private String Uid;
 
     private RecyclerView lists_layout;
@@ -54,9 +52,6 @@ public class Present_Lists extends AppCompatActivity {
 
         lists_names = new ArrayList<>();
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        database_reference = database.getReference("users");
-
         helper = new Firebase_Helper(Present_Lists.this);
         utilities = new Utilities();
     }
@@ -68,7 +63,7 @@ public class Present_Lists extends AppCompatActivity {
 
         init();
 
-        LinearLayoutManager layout_manager = new LinearLayoutManager(this);
+        LinearLayoutManager layout_manager = new LinearLayoutManager(Present_Lists.this);
         lists_layout.setLayoutManager(layout_manager);
 
         adapter = new Lists_Names_Adapter(lists_names, new Lists_Names_Adapter.OnItemClickListener() {
