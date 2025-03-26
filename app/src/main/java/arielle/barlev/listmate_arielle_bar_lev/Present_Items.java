@@ -3,51 +3,49 @@ package arielle.barlev.listmate_arielle_bar_lev;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.w3c.dom.Text;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Present_Items extends AppCompatActivity {
 
-    private TextView title;
-
-    private Button add_item;
+    private FirebaseDatabase database;
+    private DatabaseReference listReference;
+    private RecyclerView recycler_view_items;
+    private Items_Adapter adapter;
 
     private String Uid;
     private String list_name;
 
-    private RecyclerView items_layout;
-    private Map<String, Boolean> items;
-
-    private Firebase_Helper helper;
-    private Items_Adapter adapter;
-    private Utilities utilities;
-
     private void init() {
-        items_layout = findViewById(R.id.items_layout);
-        add_item = findViewById(R.id.add_item);
-        title = findViewById(R.id.title);
+        recycler_view_items = findViewById(R.id.recycler_view_items);
+        recycler_view_items.setLayoutManager(new LinearLayoutManager(this));
 
         Intent intent = getIntent();
         Uid = intent.getStringExtra("Uid");
         list_name = intent.getStringExtra("list_name");
 
-        items = new HashMap<>();
-
-        helper = new Firebase_Helper(Present_Items.this);
-        utilities = new Utilities();
+        database = FirebaseDatabase.getInstance();
+        listReference = database.getReference("users").child(Uid).child(list_name);
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,77 +54,30 @@ public class Present_Items extends AppCompatActivity {
 
         init();
 
-        title.setText(list_name);
-
-        LinearLayoutManager layout_manager = new LinearLayoutManager(Present_Items.this);
-        items_layout.setLayoutManager(layout_manager);
-
-        adapter = new Items_Adapter(items, position -> {
-            if (0 <= position && position < items.size()) {
-                String itemTitle = new java.util.ArrayList<>(items.entrySet()).get(position).getKey();
-                Boolean itemValue = new java.util.ArrayList<>(items.entrySet()).get(position).getValue();
-                utilities.make_snackbar(Present_Items.this, "Clicked: " + itemTitle + ", " + itemValue);
-            } else {
-                utilities.make_snackbar(Present_Items.this, "Error: Invalid list item clicked.");
-            }
-        }, Present_Items.this);
-        items_layout.setAdapter(adapter);
-
-        display_data();
-
-        add_item.setOnClickListener(new View.OnClickListener() {
+        listReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Present_Items.this, Add_Item.class);
-                intent.putExtra("Uid", Uid);
-                intent.putExtra("list_name", list_name);
-                startActivity(intent);
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Map.Entry<String, Boolean>> items = new ArrayList<>();
+
+                for (DataSnapshot itemSnapshot : dataSnapshot.getChildren()) {
+                    String itemName = itemSnapshot.getKey();
+                    Boolean itemValue = itemSnapshot.getValue(Boolean.class);
+
+                    if (itemName != null && itemValue != null) {
+                        items.add(new java.util.AbstractMap.SimpleEntry<>(itemName, itemValue));
+                    }
+                }
+
+                adapter = new Items_Adapter(items);
+                recycler_view_items.setAdapter(adapter);
             }
-        });
 
-    }
-
-    private void display_data0() {
-        items.clear();
-
-        helper.lists_items(Uid, list_name).thenAccept(retrievedItems -> {
-            if (retrievedItems.isEmpty()) {
-                utilities.make_snackbar(Present_Items.this, "No items found in this list.");
-            } else {
-                items.putAll(retrievedItems);
-                adapter.notifyDataSetChanged();
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle error
+                Log.e("FirebaseError", "Failed to read value.", databaseError.toException());
+                Toast.makeText(Present_Items.this, "Failed to load data.", Toast.LENGTH_SHORT).show();
             }
-        }).exceptionally(e -> {
-            utilities.make_snackbar(Present_Items.this, "Failed to fetch lists: " + e.getMessage());
-            return null;
-        });
-    }
-
-    private void display_data() {
-        items.clear();
-        utilities.make_snackbar(Present_Items.this, "display_data called");
-
-        helper.lists_items(Uid, list_name).thenAccept(retrievedItems -> {
-            utilities.make_snackbar(Present_Items.this, "Firebase retrieval successful");
-            utilities.make_snackbar(Present_Items.this, "retrievedItems: " + retrievedItems.toString());
-
-            if (retrievedItems.isEmpty()) {
-                utilities.make_snackbar(Present_Items.this, "No items found in this list.");
-                utilities.make_snackbar(Present_Items.this, "retrievedItems is empty");
-            } else {
-                items.putAll(retrievedItems);
-                utilities.make_snackbar(Present_Items.this, "Items map size: " + items.size());
-                utilities.make_snackbar(Present_Items.this, "items: " + items.toString());
-
-                runOnUiThread(() -> {
-                    utilities.make_snackbar(Present_Items.this, "adapter.notifyDataSetChanged called");
-                    adapter.notifyDataSetChanged();
-                    utilities.make_snackbar(Present_Items.this, "adapter.notifyDataSetChanged finished");
-                });
-            }
-        }).exceptionally(e -> {
-            utilities.make_snackbar(Present_Items.this, "Failed to fetch items: " + e.getMessage());
-            return null;
         });
     }
 }

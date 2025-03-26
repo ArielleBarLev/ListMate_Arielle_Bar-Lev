@@ -16,6 +16,9 @@
             android:name=".Present_Items"
             android:exported="false" />
         <activity
+            android:name=".Present_Items"
+            android:exported="false" />
+        <activity
             android:name=".Add_Item"
             android:exported="false" />
         <activity
