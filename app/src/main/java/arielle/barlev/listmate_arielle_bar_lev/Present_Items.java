@@ -26,13 +26,13 @@ import java.util.Map;
 
 public class Present_Items extends AppCompatActivity {
 
-    private FirebaseDatabase database;
-    private DatabaseReference listReference;
     private RecyclerView recycler_view_items;
-    private Items_Adapter adapter;
 
     private String Uid;
     private String list_name;
+
+    private Items_Adapter adapter;
+    private Firebase_Helper helper;
 
     private void init() {
         recycler_view_items = findViewById(R.id.recycler_view_items);
@@ -42,8 +42,7 @@ public class Present_Items extends AppCompatActivity {
         Uid = intent.getStringExtra("Uid");
         list_name = intent.getStringExtra("list_name");
 
-        database = FirebaseDatabase.getInstance();
-        listReference = database.getReference("users").child(Uid).child(list_name);
+        helper = new Firebase_Helper(Present_Items.this);
     }
 
 
@@ -54,30 +53,23 @@ public class Present_Items extends AppCompatActivity {
 
         init();
 
-        listReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                List<Map.Entry<String, Boolean>> items = new ArrayList<>();
+        fetch_list_items();
+    }
 
-                for (DataSnapshot itemSnapshot : dataSnapshot.getChildren()) {
-                    String itemName = itemSnapshot.getKey();
-                    Boolean itemValue = itemSnapshot.getValue(Boolean.class);
-
-                    if (itemName != null && itemValue != null) {
-                        items.add(new java.util.AbstractMap.SimpleEntry<>(itemName, itemValue));
-                    }
-                }
-
-                adapter = new Items_Adapter(items);
-                recycler_view_items.setAdapter(adapter);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle error
-                Log.e("FirebaseError", "Failed to read value.", databaseError.toException());
-                Toast.makeText(Present_Items.this, "Failed to load data.", Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void fetch_list_items() {
+        helper.lists_items(Uid, list_name)
+                .thenAccept(itemsMap -> {
+                    List<Map.Entry<String, Boolean>> itemsList = new ArrayList<>(itemsMap.entrySet());
+                    runOnUiThread(() -> {
+                        adapter = new Items_Adapter(itemsList);
+                        recycler_view_items.setAdapter(adapter);
+                    });
+                })
+                .exceptionally(e -> {
+                    Log.e("FirebaseError", "Failed to fetch items: " + e.getMessage());
+                    runOnUiThread(() ->
+                            Toast.makeText(Present_Items.this, "Failed to load data: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                    return null;
+                });
     }
 }
