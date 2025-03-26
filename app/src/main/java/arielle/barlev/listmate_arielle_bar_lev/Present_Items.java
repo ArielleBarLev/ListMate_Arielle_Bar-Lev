@@ -61,7 +61,16 @@ public class Present_Items extends AppCompatActivity {
                 .thenAccept(itemsMap -> {
                     List<Map.Entry<String, Boolean>> itemsList = new ArrayList<>(itemsMap.entrySet());
                     runOnUiThread(() -> {
-                        adapter = new Items_Adapter(itemsList);
+                        adapter = new Items_Adapter(itemsList); // Create adapter
+                        adapter.setOnItemClickListener(new Items_Adapter.OnItemClickListener() { // Set the listener
+                            @Override
+                            public void onItemClick(String itemName) {
+                                Toast.makeText(Present_Items.this, "Clicked: " + itemName, Toast.LENGTH_SHORT).show();
+                                helper.update_items_value(Uid, list_name, itemName);
+                                fetch_list_items();
+                                // The ValueEventListener will handle UI updates
+                            }
+                        });
                         recycler_view_items.setAdapter(adapter);
                     });
                 })

@@ -1,17 +1,10 @@
 package arielle.barlev.listmate_arielle_bar_lev;
 
 import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -210,5 +203,33 @@ public class Firebase_Helper {
             }
         });
         return future;
+    }
+
+    public void update_items_value(String Uid, String list_name, String item) {
+        DatabaseReference item_reference = _database.getReference("users").child(Uid).child(list_name).child(item);
+        
+        item_reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Boolean current_value = snapshot.getValue(Boolean.class);
+                    if (current_value != null) {
+                        item_reference.setValue(!current_value);
+                    } else {
+                        // Handle case where the value is null (optional logging)
+                        System.err.println("Warning: Item value is null for " + item + " in " + list_name);
+                    }
+                } else {
+                    // Handle case where the item doesn't exist (optional logging)
+                    System.err.println("Warning: Item '" + item + "' not found in list '" + list_name + "'");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle error during read (optional logging)
+                System.err.println("Error fetching item data for toggle: " + error.getMessage());
+            }
+        });
     }
 }
