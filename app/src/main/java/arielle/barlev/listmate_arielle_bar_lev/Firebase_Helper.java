@@ -28,15 +28,16 @@ public class Firebase_Helper {
     private FirebaseDatabase _database;
 
     /*
-        A function to insert user's id to the realtime database.
+        A function to insert user to the realtime database.
         Input: none
         Return value: none
      */
-    private void add_user_realtime_database() {
+    private void add_user_realtime_database(String email) {
         DatabaseReference users_reference = _database.getReference("users");
 
         String uid = _firebase_auth.getCurrentUser().getUid();
 
+        //Insert user's id
         users_reference.child(uid).setValue(false)
                 .addOnSuccessListener(aVoid -> {
                     utilities.make_snackbar(_context, "succeed");
@@ -44,6 +45,17 @@ public class Firebase_Helper {
                 .addOnFailureListener(e -> {
                     utilities.make_snackbar(_context, "fail");
                 });
+
+        //Insert user's details
+        users_reference.child(uid).child("details").child("name").setValue(email).addOnSuccessListener(aVoid -> {
+                    utilities.make_snackbar(_context, "succeed");
+                })
+                .addOnFailureListener(e -> {
+                    utilities.make_snackbar(_context, "fail");
+                });
+
+        //Insert user's lists (blank)
+        users_reference.child(uid).child("lists").setValue(false);
     }
 
     //Constructor
@@ -67,7 +79,7 @@ public class Firebase_Helper {
                         FirebaseUser user = _firebase_auth.getCurrentUser();
                         String uid = user.getUid();
                         future.complete(uid);
-                        add_user_realtime_database();
+                        add_user_realtime_database(email);
                     } else {
                         Exception exception = task.getException();
                         String errorMessage = "Login failed: " + (exception != null ? exception.getMessage() : "Unknown error");
