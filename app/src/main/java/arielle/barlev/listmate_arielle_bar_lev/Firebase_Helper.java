@@ -22,7 +22,7 @@ public class Firebase_Helper {
 
     private Context _context;
 
-    private Utilities utilities = new Utilities();
+    private Utilities _utilities = new Utilities();
 
     private FirebaseAuth _firebase_auth;
     private FirebaseDatabase _database;
@@ -40,18 +40,18 @@ public class Firebase_Helper {
         //Insert user's id
         users_reference.child(uid).setValue(false)
                 .addOnSuccessListener(aVoid -> {
-                    utilities.make_snackbar(_context, "succeed");
+                    _utilities.make_snackbar(_context, "succeed");
                 })
                 .addOnFailureListener(e -> {
-                    utilities.make_snackbar(_context, "fail");
+                    _utilities.make_snackbar(_context, "fail");
                 });
 
         //Insert user's details
         users_reference.child(uid).child("details").child("name").setValue(email).addOnSuccessListener(aVoid -> {
-                    utilities.make_snackbar(_context, "succeed");
+                    _utilities.make_snackbar(_context, "succeed");
                 })
                 .addOnFailureListener(e -> {
-                    utilities.make_snackbar(_context, "fail");
+                    _utilities.make_snackbar(_context, "fail");
                 });
 
         //Insert user's lists (blank)
@@ -120,15 +120,15 @@ public class Firebase_Helper {
         Return value: none
      */
     public void create_list(String Uid, String name) {
-        DatabaseReference users_reference = _database.getReference("users");
+        //Create list
+        DatabaseReference lists_reference = _database.getReference("lists");
+        lists_reference = lists_reference.push();
+        String id = lists_reference.getKey();
+        lists_reference.child("name").setValue(name);
 
-        users_reference.child(Uid).child(name).setValue(false)
-                .addOnSuccessListener(aVoid -> {
-                    utilities.make_snackbar(_context, "succeed");
-                })
-                .addOnFailureListener(e -> {
-                    utilities.make_snackbar(_context, "fail");
-                });
+        //Add list to user
+        DatabaseReference users_reference = _database.getReference("users");
+        users_reference.child(Uid).child("lists").child(id).setValue(false);
     }
 
     /*
@@ -141,10 +141,10 @@ public class Firebase_Helper {
 
         users_reference.child(Uid).child(list_name).child(item).setValue(false)
                 .addOnSuccessListener(aVoid -> {
-                    utilities.make_snackbar(_context, "succeed");
+                    _utilities.make_snackbar(_context, "succeed");
                 })
                 .addOnFailureListener(e -> {
-                    utilities.make_snackbar(_context, "fail");
+                    _utilities.make_snackbar(_context, "fail");
                 });
     }
 
