@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class Firebase_Helper {
 
@@ -56,6 +57,41 @@ public class Firebase_Helper {
 
         //Insert user's lists (blank)
         users_reference.child(uid).child("lists").setValue(false);
+    }
+
+    /*
+        A function to return user's lists' ids
+        Input: user's id
+        Return value: user's lists' ids
+     */
+    private CompletableFuture<List<String>> get_users_lists_id(String Uid) {
+        CompletableFuture<List<String>> future = new CompletableFuture<>();
+        DatabaseReference user_reference = _database.getReference("users").child(Uid).child("lists");
+
+        user_reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    List<String> list_names = new ArrayList<>();
+                    for (DataSnapshot listSnapshot : snapshot.getChildren()) {
+                        String listName = listSnapshot.getKey();
+                        if (listName != null) {
+                            list_names.add(listName);
+                        }
+                    }
+                    future.complete(list_names);
+                } else {
+                    future.complete(new ArrayList<>());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                future.completeExceptionally(new Exception("Failed to fetch lists: " + error.getMessage()));
+            }
+        });
+
+        return future;
     }
 
     //Constructor
@@ -154,31 +190,67 @@ public class Firebase_Helper {
         Return value: user's lists
      */
     public CompletableFuture<List<String>> users_lists(String Uid) {
-        CompletableFuture<List<String>> future = new CompletableFuture<>();
-        DatabaseReference user_reference = _database.getReference("users").child(Uid);
 
-        user_reference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    List<String> list_names = new ArrayList<>();
-                    for (DataSnapshot listSnapshot : snapshot.getChildren()) {
-                        String listName = listSnapshot.getKey();
-                        if (listName != null) {
-                            list_names.add(listName);
+        CompletableFuture<List<String>> future = new CompletableFuture<>();
+        CompletableFuture<List<String>> lists_id = get_users_lists_id(Uid);
+
+        List<String> list_names = new ArrayList<>();
+
+        lists_id.thenAccept(ids -> {
+            List<CompletableFuture<String>> fetch_names_future = new ArrayList<>();
+
+            for (String id : ids) {
+                CompletableFuture<String> names_future = new CompletableFuture<>();
+                DatabaseReference reference = _database.getReference("lists").child(id).child("name");
+
+                reference.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            String list_name = snapshot.getValue(String.class);
+
+                            if (list_name != null) {
+                                names_future.complete(list_name);
+                            } else {
+                                names_future.complete(null);
+                            }
+                        } else {
+                            names_future.complete(null);
                         }
                     }
-                    future.complete(list_names);
-                } else {
-                    future.complete(new ArrayList<>());
-                }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        future.completeExceptionally(new Exception("Failed to fetch lists: " + error.getMessage()));
+                    }
+                });
+
+                fetch_names_future.add(names_future);
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                future.completeExceptionally(new Exception("Failed to fetch lists: " + error.getMessage()));
-            }
+            CompletableFuture.allOf(fetch_name_future.toArray(new CompletableFuture[0])).thenAccept(v -> {
+                for (CompletableFuture<String> name_future : fetch_name_future) {
+                    try {
+                        String name = name_future.get();
+                        if (name != null) {
+                            list_names.add(name);
+                        }
+                    } catch (InterruptedException | ExecutionException e) {
+                        _utilities.make_snackbar(_context, e.getMessage());
+                    }
+                }
+
+                future.complete(list_names);
+            }).exceptionally(e -> {
+                future.completeExceptionally(new Exception("Error fetching all list names: " + e.getMessage()));
+                return null;
+            });
+        }).exceptionally(e -> {
+            _utilities.make_snackbar(_context, e.getMessage());
+            future.completeExceptionally(e); // Propagate the exception to the main future
+            return null;
         });
+
         return future;
     }
 
