@@ -76,7 +76,8 @@ public class Present_Lists extends AppCompatActivity {
                 if (0 <= position && position < lists_ids.size()) {
                     String list_id = lists_ids.get(position);
                     utilities.make_snackbar(Present_Lists.this, "Clicked List ID: " + list_id);
-                    Intent intent = new Intent(Present_Lists.this, Present_Items.class);
+                    //Intent intent = new Intent(Present_Lists.this, Present_Items.class);
+                    Intent intent = new Intent(Present_Lists.this, Add_Item.class);
                     intent.putExtra("Uid", Uid);
                     intent.putExtra("list_id", list_id);
                     startActivity(intent);

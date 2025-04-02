@@ -134,13 +134,13 @@ public class Firebase_Helper {
 
     /*
         A function to add an item to a list.
-        Input: user's id, list's name, item
+        Input: list's id, item
         Return value: none
      */
-    public void add_item(String Uid, String list_name, String item) {
-        DatabaseReference users_reference = _database.getReference("users");
+    public void add_item(String list_id, String item) {
+        DatabaseReference users_reference = _database.getReference("lists");
 
-        users_reference.child(Uid).child(list_name).child(item).setValue(false)
+        users_reference.child(list_id).child("items").child(item).setValue(false)
                 .addOnSuccessListener(aVoid -> {
                     _utilities.make_snackbar(_context, "succeed");
                 })
