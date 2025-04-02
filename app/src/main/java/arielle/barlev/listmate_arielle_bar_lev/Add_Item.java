@@ -79,7 +79,7 @@ public class Add_Item extends AppCompatActivity {
                 Intent intent = new Intent(Add_Item.this, Present_Items.class);
                 intent.putExtra("Uid", Uid);
                 intent.putExtra("list_id", list_id);
-                //startActivity(intent);
+                startActivity(intent);
             }
         });
     }

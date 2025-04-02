@@ -216,12 +216,12 @@ public class Firebase_Helper {
 
     /*
         A function to return all list's items.
-        Input: user's id, list's name
+        Input: list's id
         Return value: list's items
      */
-    public CompletableFuture<Map<String, Boolean>> lists_items(String Uid, String list_name) {
+    public CompletableFuture<Map<String, Boolean>> lists_items(String list_id) {
         CompletableFuture<Map<String, Boolean>> future = new CompletableFuture<>();
-        DatabaseReference user_reference = _database.getReference("users").child(Uid).child(list_name);
+        DatabaseReference user_reference = _database.getReference("lists").child(list_id).child("items");
 
         user_reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

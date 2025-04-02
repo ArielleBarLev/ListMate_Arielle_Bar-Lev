@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/item_name"
+        android:id="@+id/item_value"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="243dp"
@@ -14,19 +14,19 @@
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/item_value"
+        app:layout_constraintStart_toEndOf="@+id/item_name"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Item Name" />
+        tools:text="true" />
 
     <TextView
-        android:id="@+id/item_value"
+        android:id="@+id/item_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="52dp"
         android:textSize="16sp"
-        app:layout_constraintEnd_toStartOf="@+id/item_name"
+        app:layout_constraintEnd_toStartOf="@+id/item_value"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="true" />
+        tools:text="Item Name" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
