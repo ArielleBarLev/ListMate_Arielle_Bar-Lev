@@ -29,6 +29,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class Present_Lists extends AppCompatActivity {
 
@@ -38,6 +40,7 @@ public class Present_Lists extends AppCompatActivity {
 
     private RecyclerView lists_layout;
     private List<String> lists_names;
+    private List<String> lists_ids;
 
     private Firebase_Helper helper;
     private Lists_Names_Adapter adapter;
@@ -51,6 +54,7 @@ public class Present_Lists extends AppCompatActivity {
         Uid = intent.getStringExtra("Uid");
 
         lists_names = new ArrayList<>();
+        lists_ids = new ArrayList<>();
 
         helper = new Firebase_Helper(Present_Lists.this);
         utilities = new Utilities();
@@ -69,12 +73,12 @@ public class Present_Lists extends AppCompatActivity {
         adapter = new Lists_Names_Adapter(lists_names, new Lists_Names_Adapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
-                if (0 <= position && position < lists_names.size()) {
-                    String list_name = lists_names.get(position);
-                    utilities.make_snackbar(Present_Lists.this, "Clicked: " + list_name);
+                if (0 <= position && position < lists_ids.size()) {
+                    String list_id = lists_ids.get(position);
+                    utilities.make_snackbar(Present_Lists.this, "Clicked List ID: " + list_id);
                     Intent intent = new Intent(Present_Lists.this, Present_Items.class);
                     intent.putExtra("Uid", Uid);
-                    intent.putExtra("list_name", list_name);
+                    intent.putExtra("list_id", list_id);
                     startActivity(intent);
                 } else {
                     utilities.make_snackbar(Present_Lists.this, "Error: Invalid list item clicked.");
@@ -97,16 +101,45 @@ public class Present_Lists extends AppCompatActivity {
 
     private void display_data() {
         lists_names.clear();
+        lists_ids.clear();
 
-        helper.users_lists(Uid).thenAccept(retrievedListNames -> {
-            if (retrievedListNames.isEmpty()) {
+        helper.users_lists(Uid).thenAccept(retrievedListIds -> {
+            if (retrievedListIds.isEmpty()) {
                 utilities.make_snackbar(Present_Lists.this, "No lists found for this user.");
             } else {
-                lists_names.addAll(retrievedListNames);
-                adapter.notifyDataSetChanged();
+                lists_ids.addAll(retrievedListIds);
+                List<CompletableFuture<String>> nameFutures = new ArrayList<>();
+
+                for (String id : retrievedListIds) {
+                    nameFutures.add(helper.get_list_name(id));
+                }
+
+                CompletableFuture.allOf(nameFutures.toArray(new CompletableFuture[0]))
+                        .thenAccept(v -> {
+                            List<String> retrievedNames = new ArrayList<>();
+                            for (CompletableFuture<String> nameFuture : nameFutures) {
+                                try {
+                                    String name = nameFuture.get();
+                                    if (name != null) {
+                                        retrievedNames.add(name);
+                                    }
+                                } catch (InterruptedException | ExecutionException e) {
+                                    utilities.make_snackbar(Present_Lists.this, "Error getting list name: " + e.getMessage());
+                                    Log.e(TAG, "Error getting list name", e);
+                                }
+                            }
+                            lists_names.addAll(retrievedNames);
+                            adapter.notifyDataSetChanged();
+                        })
+                        .exceptionally(e -> {
+                            utilities.make_snackbar(Present_Lists.this, "Failed to fetch list names: " + e.getMessage());
+                            Log.e(TAG, "Failed to fetch list names", e);
+                            return null;
+                        });
             }
         }).exceptionally(e -> {
-            utilities.make_snackbar(Present_Lists.this, "Failed to fetch lists: " + e.getMessage());
+            utilities.make_snackbar(Present_Lists.this, "Failed to fetch list IDs: " + e.getMessage());
+            Log.e(TAG, "Failed to fetch list IDs", e);
             return null;
         });
     }
