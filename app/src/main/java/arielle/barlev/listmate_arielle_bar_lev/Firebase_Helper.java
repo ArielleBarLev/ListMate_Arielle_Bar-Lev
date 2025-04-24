@@ -249,8 +249,8 @@ public class Firebase_Helper {
         return future;
     }
 
-    public void update_items_value(String Uid, String list_name, String item) {
-        DatabaseReference item_reference = _database.getReference("users").child(Uid).child(list_name).child(item);
+    public void update_items_value(String list_id, String item) {
+        DatabaseReference item_reference = _database.getReference("lists").child(list_id).child("items").child(item);
         
         item_reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -261,18 +261,18 @@ public class Firebase_Helper {
                         item_reference.setValue(!current_value);
                     } else {
                         // Handle case where the value is null (optional logging)
-                        System.err.println("Warning: Item value is null for " + item + " in " + list_name);
+                        _utilities.make_snackbar(_context, "Warning: Item value is null for " + item + " in " + list_id);
                     }
                 } else {
                     // Handle case where the item doesn't exist (optional logging)
-                    System.err.println("Warning: Item '" + item + "' not found in list '" + list_name + "'");
+                    _utilities.make_snackbar(_context, "Warning: Item '" + item + "' not found in list '" + list_id + "'");
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 // Handle error during read (optional logging)
-                System.err.println("Error fetching item data for toggle: " + error.getMessage());
+                _utilities.make_snackbar(_context, "Error fetching item data for toggle: " + error.getMessage());
             }
         });
     }

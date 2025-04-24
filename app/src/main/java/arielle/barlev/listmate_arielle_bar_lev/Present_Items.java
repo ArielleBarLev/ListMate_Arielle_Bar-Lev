@@ -102,7 +102,7 @@ public class Present_Items extends AppCompatActivity {
                             @Override
                             public void onItemClick(String itemName) {
                                 Toast.makeText(Present_Items.this, "Clicked: " + itemName, Toast.LENGTH_SHORT).show();
-                                helper.update_items_value(Uid, list_name, itemName);
+                                helper.update_items_value(list_id, itemName);
                                 fetch_list_items();
                             }
                         });
@@ -112,7 +112,7 @@ public class Present_Items extends AppCompatActivity {
                 .exceptionally(e -> {
                     Log.e("FirebaseError", "Failed to fetch items: " + e.getMessage());
                     runOnUiThread(() ->
-                            Toast.makeText(Present_Items.this, "Failed to load data: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                            utilities.make_snackbar(Present_Items.this, "Failed to load data: " + e.getMessage()));
                     return null;
                 });
     }
