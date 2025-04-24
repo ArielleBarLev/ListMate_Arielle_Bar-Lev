@@ -249,6 +249,11 @@ public class Firebase_Helper {
         return future;
     }
 
+    /*
+        A function to update item's value
+        Input: list's id, item
+        Return value: none
+     */
     public void update_items_value(String list_id, String item) {
         DatabaseReference item_reference = _database.getReference("lists").child(list_id).child("items").child(item);
         
@@ -263,6 +268,36 @@ public class Firebase_Helper {
                         // Handle case where the value is null (optional logging)
                         _utilities.make_snackbar(_context, "Warning: Item value is null for " + item + " in " + list_id);
                     }
+                } else {
+                    // Handle case where the item doesn't exist (optional logging)
+                    _utilities.make_snackbar(_context, "Warning: Item '" + item + "' not found in list '" + list_id + "'");
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle error during read (optional logging)
+                _utilities.make_snackbar(_context, "Error fetching item data for toggle: " + error.getMessage());
+            }
+        });
+    }
+
+    /*
+        A function to delete item from the list
+        Input: list's id, item
+        Return value: none
+     */
+    public void delete_item(String list_id, String item) {
+        DatabaseReference item_reference = _database.getReference("lists").child(list_id).child("items").child(item);
+
+        item_reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    item_reference.removeValue().addOnSuccessListener(aVoid -> {
+                    }).addOnFailureListener(e -> {
+                        _utilities.make_snackbar(_context, "Error toggling off '" + item + "' in list '" + list_id + "': " + e.getMessage());
+                    });
                 } else {
                     // Handle case where the item doesn't exist (optional logging)
                     _utilities.make_snackbar(_context, "Warning: Item '" + item + "' not found in list '" + list_id + "'");

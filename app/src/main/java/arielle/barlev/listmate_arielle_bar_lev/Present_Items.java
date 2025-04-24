@@ -31,7 +31,9 @@ public class Present_Items extends AppCompatActivity {
 
     private TextView title;
     private RecyclerView recycler_view_items;
+
     private Button add_item;
+    private Button back;
 
     private String Uid;
     private String list_id;
@@ -47,6 +49,7 @@ public class Present_Items extends AppCompatActivity {
 
         title = findViewById(R.id.title);
         add_item = findViewById(R.id.add_item);
+        back = findViewById(R.id.back);
 
         Intent intent = getIntent();
         Uid = intent.getStringExtra("Uid");
@@ -90,6 +93,15 @@ public class Present_Items extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Present_Items.this, Present_Lists.class);
+                intent.putExtra("Uid", Uid);
+                startActivity(intent);
+            }
+        });
     }
 
     private void fetch_list_items() {
@@ -100,12 +112,30 @@ public class Present_Items extends AppCompatActivity {
                         adapter = new Items_Adapter(itemsList);
                         adapter.setOnItemClickListener(new Items_Adapter.OnItemClickListener() {
                             @Override
-                            public void onItemClick(String itemName) {
-                                Toast.makeText(Present_Items.this, "Clicked: " + itemName, Toast.LENGTH_SHORT).show();
-                                helper.update_items_value(list_id, itemName);
+                            public void onItemClick(String item) {
+                                Toast.makeText(Present_Items.this, "Clicked: " + item, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                        adapter.setOnTrashClickListener(new Items_Adapter.OnTrashClickListener() {
+                            @Override
+                            public void onTrashClick(String item) {
+                                Toast.makeText(Present_Items.this, "Trash: " + item, Toast.LENGTH_SHORT).show();
+                                helper.delete_item(list_id, item);
                                 fetch_list_items();
                             }
                         });
+
+                        adapter.setOnCircleClickListener(new Items_Adapter.OnCircleClickListener() {
+                            @Override
+                            public void onCircleClick(String item) {
+                                Toast.makeText(Present_Items.this, "Circle: " + item, Toast.LENGTH_SHORT).show();
+
+                                helper.update_items_value(list_id, item);
+                                fetch_list_items();
+                            }
+                        });
+
                         recycler_view_items.setAdapter(adapter);
                     });
                 })
