@@ -105,45 +105,51 @@ public class Present_Items extends AppCompatActivity {
     }
 
     private void fetch_list_items() {
-        helper.lists_items(list_id)
-                .thenAccept(itemsMap -> {
-                    List<Map.Entry<String, Boolean>> itemsList = new ArrayList<>(itemsMap.entrySet());
-                    runOnUiThread(() -> {
-                        adapter = new Items_Adapter(itemsList);
-                        adapter.setOnItemClickListener(new Items_Adapter.OnItemClickListener() {
-                            @Override
-                            public void onItemClick(String item) {
-                                Toast.makeText(Present_Items.this, "Clicked: " + item, Toast.LENGTH_SHORT).show();
-                            }
-                        });
-
-                        adapter.setOnTrashClickListener(new Items_Adapter.OnTrashClickListener() {
-                            @Override
-                            public void onTrashClick(String item) {
-                                Toast.makeText(Present_Items.this, "Trash: " + item, Toast.LENGTH_SHORT).show();
-                                helper.delete_item(list_id, item);
-                                fetch_list_items();
-                            }
-                        });
-
-                        adapter.setOnCircleClickListener(new Items_Adapter.OnCircleClickListener() {
-                            @Override
-                            public void onCircleClick(String item) {
-                                Toast.makeText(Present_Items.this, "Circle: " + item, Toast.LENGTH_SHORT).show();
-
-                                helper.update_items_value(list_id, item);
-                                fetch_list_items();
-                            }
-                        });
-
-                        recycler_view_items.setAdapter(adapter);
-                    });
-                })
-                .exceptionally(e -> {
-                    Log.e("FirebaseError", "Failed to fetch items: " + e.getMessage());
-                    runOnUiThread(() ->
-                            utilities.make_snackbar(Present_Items.this, "Failed to load data: " + e.getMessage()));
-                    return null;
+        helper.lists_items(list_id).thenAccept(itemsMap -> {
+            List<Map.Entry<String, Boolean>> itemsList = new ArrayList<>(itemsMap.entrySet());
+            runOnUiThread(() -> {
+                adapter = new Items_Adapter(itemsList);
+                adapter.setOnItemClickListener(new Items_Adapter.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(String item) {
+                        Toast.makeText(Present_Items.this, "Clicked: " + item, Toast.LENGTH_SHORT).show();
+                    }
                 });
+
+                adapter.setOnTrashClickListener(new Items_Adapter.OnTrashClickListener() {
+                    @Override
+                    public void onTrashClick(String item) {
+                        Toast.makeText(Present_Items.this, "Trash: " + item, Toast.LENGTH_SHORT).show();
+                        
+                        helper.delete_item(list_id, item);
+                        update_activity();
+                    }
+                });
+
+                adapter.setOnCircleClickListener(new Items_Adapter.OnCircleClickListener() {
+                    @Override
+                    public void onCircleClick(String item) {
+                        Toast.makeText(Present_Items.this, "Circle: " + item, Toast.LENGTH_SHORT).show();
+
+                        helper.update_items_value(list_id, item);
+                        update_activity();
+                    }
+                });
+
+                recycler_view_items.setAdapter(adapter);
+            });
+        }).exceptionally(e -> {
+            Log.e("FirebaseError", "Failed to fetch items: " + e.getMessage());
+            runOnUiThread(() ->
+                    utilities.make_snackbar(Present_Items.this, "Failed to load data: " + e.getMessage()));
+            return null;
+        });
+    }
+
+    private void update_activity() {
+        Intent intent = new Intent(Present_Items.this, Present_Items.class);
+        intent.putExtra("Uid", Uid);
+        intent.putExtra("list_id", list_id);
+        startActivity(intent);
     }
 }
