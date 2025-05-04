@@ -74,7 +74,7 @@ public class Add_Item extends AppCompatActivity {
 
                 utilities.make_snackbar(Add_Item.this, list_id);
 
-                helper.add_item(list_id, item_content);
+                helper.add_item(list_id, item_content, false);
 
                 Intent intent = new Intent(Add_Item.this, Present_Items.class);
                 intent.putExtra("Uid", Uid);

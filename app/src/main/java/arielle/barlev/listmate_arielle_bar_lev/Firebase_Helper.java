@@ -1,6 +1,8 @@
 package arielle.barlev.listmate_arielle_bar_lev;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -59,6 +61,46 @@ public class Firebase_Helper {
         users_reference.child(uid).child("lists").setValue(false);
     }
 
+    /*
+        A function to return item's value.
+        Input: list's id, item
+        Return value: item's value
+     */
+    private CompletableFuture<Boolean> item_value(String list_id, String item) {
+        DatabaseReference item_reference = _database.getReference("lists").child(list_id).child("items").child(item);
+
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+
+        item_reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Boolean value = snapshot.getValue(Boolean.class);
+                    _utilities.make_snackbar(_context, "value: " + value.toString());
+                    if (value != null) {
+                        future.complete(value);
+                    } else {
+                        // Handle case where the value is null (optional logging)
+                        _utilities.make_snackbar(_context, "Warning: Item value is null for " + item + " in " + list_id);
+                        future.complete(null);
+                    }
+                } else {
+                    // Handle case where the item doesn't exist (optional logging)
+                    _utilities.make_snackbar(_context, "Warning: Item '" + item + "' not found in list '" + list_id + "'");
+                    future.complete(null);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle error during read (optional logging)
+                _utilities.make_snackbar(_context, "Error fetching item data for toggle: " + error.getMessage());
+            }
+        });
+
+        return future;
+    }
+
     //Constructor
     public Firebase_Helper(Context context) {
         _context = context;
@@ -74,19 +116,18 @@ public class Firebase_Helper {
     public CompletableFuture<String> sign_up(String email, String password) {
         CompletableFuture<String> future = new CompletableFuture<>();
 
-        _firebase_auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser user = _firebase_auth.getCurrentUser();
-                        String uid = user.getUid();
-                        future.complete(uid);
-                        add_user_realtime_database(email);
-                    } else {
-                        Exception exception = task.getException();
-                        String errorMessage = "Login failed: " + (exception != null ? exception.getMessage() : "Unknown error");
-                        future.completeExceptionally(new Exception(errorMessage));
-                    }
-                });
+        _firebase_auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                FirebaseUser user = _firebase_auth.getCurrentUser();
+                String uid = user.getUid();
+                future.complete(uid);
+                add_user_realtime_database(email);
+            } else {
+                Exception exception = task.getException();
+                String errorMessage = "Login failed: " + (exception != null ? exception.getMessage() : "Unknown error");
+                future.completeExceptionally(new Exception(errorMessage));
+            }
+        });
 
         return future;
     }
@@ -137,10 +178,10 @@ public class Firebase_Helper {
         Input: list's id, item
         Return value: none
      */
-    public void add_item(String list_id, String item) {
+    public void add_item(String list_id, String item, Boolean value) {
         DatabaseReference users_reference = _database.getReference("lists");
 
-        users_reference.child(list_id).child("items").child(item).setValue(false)
+        users_reference.child(list_id).child("items").child(item).setValue(value)
                 .addOnSuccessListener(aVoid -> {
                     _utilities.make_snackbar(_context, "succeed");
                 })
@@ -256,7 +297,7 @@ public class Firebase_Helper {
      */
     public void update_items_value(String list_id, String item) {
         DatabaseReference item_reference = _database.getReference("lists").child(list_id).child("items").child(item);
-        
+
         item_reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -309,6 +350,28 @@ public class Firebase_Helper {
                 // Handle error during read (optional logging)
                 _utilities.make_snackbar(_context, "Error fetching item data for toggle: " + error.getMessage());
             }
+        });
+    }
+
+    /*
+        A function to update an item.
+        Input: list's id, item, new item
+        Return value: none
+     */
+    public void update_item(String list_id, String item, String new_item) {
+        CompletableFuture<Boolean> future = item_value(list_id, item);
+
+        future.thenAccept(value -> {
+            if (value != null) {
+                add_item(list_id, new_item, value);
+                delete_item(list_id, item);
+                _utilities.make_snackbar(_context, "Item '" + item + "' updated to '" + new_item + "'");
+            } else {
+                _utilities.make_snackbar(_context, "Error: Could not retrieve value for item '" + item + "'");
+            }
+        }).exceptionally(ex -> {
+            _utilities.make_snackbar(_context, "Error updating item '" + item + "': " + ex.getMessage());
+            return null;
         });
     }
 }
