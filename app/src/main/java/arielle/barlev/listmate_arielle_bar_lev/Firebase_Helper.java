@@ -374,4 +374,21 @@ public class Firebase_Helper {
             return null;
         });
     }
+
+    /*
+        A function to share list with other user
+        Input: list's id, user's id
+        Return value: none
+     */
+    public void share_list(String list_id, String user_id) {
+        DatabaseReference users_reference = _database.getReference("users");
+
+        users_reference.child(user_id).child("lists").child(list_id).setValue(false)
+                .addOnSuccessListener(aVoid -> {
+                    _utilities.make_snackbar(_context, "succeed");
+                })
+                .addOnFailureListener(e -> {
+                    _utilities.make_snackbar(_context, "fail");
+                });
+    }
 }

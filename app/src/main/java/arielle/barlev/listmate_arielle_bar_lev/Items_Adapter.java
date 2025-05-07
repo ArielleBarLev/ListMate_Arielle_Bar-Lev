@@ -45,7 +45,6 @@ public class Items_Adapter extends RecyclerView.Adapter<Items_Adapter.ViewHolder
         _circleClickListener = listener;
     }
 
-    // Method to update the item's value locally
     public void updateItemValue(String itemName, boolean newValue) {
         for (int i = 0; i < _items_list.size(); i++) {
             if (_items_list.get(i).getKey().equals(itemName)) {
@@ -98,7 +97,6 @@ public class Items_Adapter extends RecyclerView.Adapter<Items_Adapter.ViewHolder
         }
     }
 
-    // Method to delete an item locally
     public void deleteItem(String itemName) {
         for (int i = 0; i < _items_list.size(); i++) {
             if (_items_list.get(i).getKey().equals(itemName)) {
