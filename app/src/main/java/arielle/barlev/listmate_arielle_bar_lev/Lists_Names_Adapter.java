@@ -12,16 +12,21 @@ import java.util.List;
 
 public class Lists_Names_Adapter extends RecyclerView.Adapter<Lists_Names_Adapter.ViewHolder> {
 
-    private final List<String> _list_names; // Use final for the list
+    private final List<String> _list_names;
     private OnItemClickListener _listener;
     private OnShareClickListener _shareClickListener;
+    private OnCalendarClickListener _calendarClickListener;
 
     public interface OnItemClickListener {
-        void onItemClick(String list_name); // Pass the list name
+        void onItemClick(String list_name);
     }
 
     public interface OnShareClickListener {
-        void onShareClick(String list_name); // Pass the list name
+        void onShareClick(String list_name);
+    }
+
+    public interface OnCalendarClickListener {
+        void onCalendarClick(String list_name);
     }
 
     public Lists_Names_Adapter(List<String> list_names) {
@@ -34,6 +39,10 @@ public class Lists_Names_Adapter extends RecyclerView.Adapter<Lists_Names_Adapte
 
     public void setOnShareClickListener(OnShareClickListener listener) {
         _shareClickListener = listener;
+    }
+
+    public void setOnCalendarClickListener(OnCalendarClickListener listener) {
+        _calendarClickListener = listener;
     }
 
     @NonNull
@@ -60,6 +69,12 @@ public class Lists_Names_Adapter extends RecyclerView.Adapter<Lists_Names_Adapte
                 _shareClickListener.onShareClick(list_name); // Pass the list name
             }
         });
+
+        holder.icon_calendar.setOnClickListener(v -> {
+            if (_calendarClickListener != null) {
+                _calendarClickListener.onCalendarClick(list_name);
+            }
+        });
     }
 
     @Override
@@ -70,11 +85,13 @@ public class Lists_Names_Adapter extends RecyclerView.Adapter<Lists_Names_Adapte
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView list_name;
         public ImageView icon_share;
+        public ImageView icon_calendar;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             list_name = itemView.findViewById(R.id.list_name);
             icon_share = itemView.findViewById(R.id.icon_share);
+            icon_calendar = itemView.findViewById(R.id.icon_calendar);
         }
     }
 }

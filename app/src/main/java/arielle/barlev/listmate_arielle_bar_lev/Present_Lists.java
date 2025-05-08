@@ -132,6 +132,23 @@ public class Present_Lists extends AppCompatActivity {
             }
         });
 
+        adapter.setOnCalendarClickListener(new Lists_Names_Adapter.OnCalendarClickListener() {
+            @Override
+            public void onCalendarClick(String list_name) {
+                int position = lists_names.indexOf(list_name);
+                if (position != -1 && position < lists_ids.size()) {
+                    String list_id = lists_ids.get(position);
+                    utilities.make_snackbar(Present_Lists.this, "Clicked List: " + list_name + " (ID: " + list_id + ")");
+                    Intent intent = new Intent(Present_Lists.this, Alert_Scheduling.class);
+                    intent.putExtra("Uid", Uid);
+                    intent.putExtra("list_id", list_id);
+                    startActivity(intent);
+                } else {
+                    utilities.make_snackbar(Present_Lists.this, "Error: Invalid list item clicked.");
+                }
+            }
+        });
+
         add_list.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
