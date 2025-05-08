@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
@@ -52,6 +53,17 @@ public class Present_Items extends AppCompatActivity {
 
     private List<Map.Entry<String, Boolean>> current_items_list;
 
+    private Handler handler = new Handler();
+    private static final long UPDATE_INTERVAL = 5000;
+
+    private Runnable data_update_runnable = new Runnable() {
+        @Override
+        public void run() {
+            fetch_list_items();
+            handler.postDelayed(this, UPDATE_INTERVAL);
+        }
+    };
+
     private void init() {
         recycler_view_items = findViewById(R.id.recycler_view_items);
         recycler_view_items.setLayoutManager(new LinearLayoutManager(this));
@@ -72,6 +84,7 @@ public class Present_Items extends AppCompatActivity {
         helper.get_list_name(list_id)
                 .thenAccept(listName -> {
                     if (listName != null) {
+                        title.setText(listName);
                         utilities.make_snackbar(Present_Items.this, "Retrieved list name: " + listName);
                     } else {
                         utilities.make_snackbar(Present_Items.this, "List name not found for ID: " + list_id);
@@ -91,9 +104,7 @@ public class Present_Items extends AppCompatActivity {
 
         init();
 
-        title.setText(list_name);
-
-        fetch_list_items();
+        //fetch_list_items();
 
         add_item.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,6 +124,18 @@ public class Present_Items extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        handler.postDelayed(data_update_runnable, 0);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        handler.removeCallbacks(data_update_runnable);
     }
 
     private void fetch_list_items() {
