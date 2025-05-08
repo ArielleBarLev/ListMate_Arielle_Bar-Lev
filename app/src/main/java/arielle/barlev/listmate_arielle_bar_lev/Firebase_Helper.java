@@ -1,8 +1,6 @@
 package arielle.barlev.listmate_arielle_bar_lev;
 
 import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -19,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 public class Firebase_Helper {
 
@@ -62,11 +59,46 @@ public class Firebase_Helper {
     }
 
     /*
+        A function to return the id of the user
+        Input: email
+        Return value: user's id
+     */
+    private CompletableFuture<String> get_user_id(String email) {
+        CompletableFuture<String> future = new CompletableFuture<>();
+        DatabaseReference user_reference = _database.getReference("users");
+
+        user_reference.orderByChild("details/name").equalTo(email).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                        String user_id = userSnapshot.getKey();
+                        future.complete(user_id);
+                        return;
+                    }
+
+                    future.complete(null);
+                } else {
+                    future.complete(null);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                _utilities.make_snackbar(_context, "DatabaseError: " + databaseError.getMessage());
+                future.completeExceptionally(databaseError.toException());
+            }
+        });
+
+        return future;
+    }
+
+    /*
         A function to return item's value.
         Input: list's id, item
         Return value: item's value
      */
-    private CompletableFuture<Boolean> item_value(String list_id, String item) {
+    private CompletableFuture<Boolean> get_item_value(String list_id, String item) {
         DatabaseReference item_reference = _database.getReference("lists").child(list_id).child("items").child(item);
 
         CompletableFuture<Boolean> future = new CompletableFuture<>();
@@ -359,7 +391,7 @@ public class Firebase_Helper {
         Return value: none
      */
     public void update_item(String list_id, String item, String new_item) {
-        CompletableFuture<Boolean> future = item_value(list_id, item);
+        CompletableFuture<Boolean> future = get_item_value(list_id, item);
 
         future.thenAccept(value -> {
             if (value != null) {
@@ -377,18 +409,29 @@ public class Firebase_Helper {
 
     /*
         A function to share list with other user
-        Input: list's id, user's id
+        Input: list's id, user's email
         Return value: none
      */
-    public void share_list(String list_id, String user_id) {
+    public void share_list(String list_id, String email) {
         DatabaseReference users_reference = _database.getReference("users");
 
-        users_reference.child(user_id).child("lists").child(list_id).setValue(false)
-                .addOnSuccessListener(aVoid -> {
-                    _utilities.make_snackbar(_context, "succeed");
-                })
-                .addOnFailureListener(e -> {
-                    _utilities.make_snackbar(_context, "fail");
-                });
+        CompletableFuture<String> future = get_user_id(email);
+
+        future.thenAccept(user_id -> {
+            if (user_id != null) {
+                users_reference.child(user_id).child("lists").child(list_id).setValue(false)
+                        .addOnSuccessListener(aVoid -> {
+                            _utilities.make_snackbar(_context, "succeed");
+                        })
+                        .addOnFailureListener(e -> {
+                            _utilities.make_snackbar(_context, "fail");
+                        });
+            } else {
+                _utilities.make_snackbar(_context, "Error: Could not retrieve id for email '" + email + "'");
+            }
+        }).exceptionally(ex -> {
+            _utilities.make_snackbar(_context, "Error share list '" + list_id + "': " + ex.getMessage());
+            return null;
+        });
     }
 }
