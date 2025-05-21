@@ -172,48 +172,6 @@ public class Present_Lists extends AppCompatActivity {
         handler.removeCallbacks(data_update_runnable);
     }
 
-    private void display_data() {
-        lists_names.clear();
-        lists_ids.clear();
-
-        helper.users_lists(Uid).thenAccept(retrievedListIds -> {
-            if (retrievedListIds.isEmpty()) {
-                utilities.make_snackbar(Present_Lists.this, "No lists found for this user.");
-            } else {
-                lists_ids.addAll(retrievedListIds);
-                List<CompletableFuture<String>> nameFutures = new ArrayList<>();
-
-                for (String id : retrievedListIds) {
-                    nameFutures.add(helper.get_list_name(id));
-                }
-
-                CompletableFuture.allOf(nameFutures.toArray(new CompletableFuture[0]))
-                        .thenAccept(v -> {
-                            List<String> retrievedNames = new ArrayList<>();
-                            for (CompletableFuture<String> nameFuture : nameFutures) {
-                                try {
-                                    String name = nameFuture.get();
-                                    if (name != null) {
-                                        retrievedNames.add(name);
-                                    }
-                                } catch (InterruptedException | ExecutionException e) {
-                                    utilities.make_snackbar(Present_Lists.this, "Error getting list name: " + e.getMessage());
-                                }
-                            }
-                            lists_names.addAll(retrievedNames);
-                            adapter.notifyDataSetChanged();
-                        })
-                        .exceptionally(e -> {
-                            utilities.make_snackbar(Present_Lists.this, "Failed to fetch list names: " + e.getMessage());
-                            return null;
-                        });
-            }
-        }).exceptionally(e -> {
-            utilities.make_snackbar(Present_Lists.this, "Failed to fetch list IDs: " + e.getMessage());
-            return null;
-        });
-    }
-
     private void fetch_display_data() {
         if (is_fetching_data.compareAndSet(false, true)) {
             helper.users_lists(Uid).thenAccept(retrieved_list_ids -> {
