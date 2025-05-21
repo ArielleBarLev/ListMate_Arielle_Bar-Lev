@@ -8,7 +8,7 @@ import android.content.Intent;
 
 import androidx.core.app.NotificationCompat;
 
-public class NotificationReceiver extends BroadcastReceiver {
+public class Notification_Receiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String message = intent.getStringExtra("message");
@@ -26,7 +26,7 @@ public class NotificationReceiver extends BroadcastReceiver {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "notifyChannel")
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle("Scheduled Notification")
+                .setContentTitle("ListMate Reminder")
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(content_intent)

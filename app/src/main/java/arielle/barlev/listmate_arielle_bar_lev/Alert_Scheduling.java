@@ -9,20 +9,14 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import java.util.Calendar;
 
@@ -40,6 +34,11 @@ public class Alert_Scheduling extends AppCompatActivity {
     private int selected_hour = -1;
     private int selected_minute = -1;
 
+    private String Uid;
+    private String list_id;
+    private String list_name;
+
+    private Firebase_Helper helper;
     private Utilities utilities;
 
     private void init() {
@@ -47,7 +46,14 @@ public class Alert_Scheduling extends AppCompatActivity {
         time = findViewById(R.id.time);
         schedule = findViewById(R.id.schedule);
 
+        Intent intent = getIntent();
+        Uid = intent.getStringExtra("Uid");
+        list_id = intent.getStringExtra("list_id");
+
+        helper = new Firebase_Helper(Alert_Scheduling.this);
         utilities = new Utilities();
+
+        get_list_name(list_id);
     }
 
     @Override
@@ -126,14 +132,30 @@ public class Alert_Scheduling extends AppCompatActivity {
         createNotificationChannel();
     }
 
+    private void get_list_name(String list_id) {
+        helper.get_list_name(list_id)
+                .thenAccept(listName -> {
+                    if (listName != null) {
+                        list_name = listName;
+                    } else {
+                        utilities.make_snackbar(Alert_Scheduling.this, "List name not found for ID: " + list_id);
+                        list_name = null;
+                    }
+                })
+                .exceptionally(error -> {
+                    utilities.make_snackbar(Alert_Scheduling.this, "Failed to retrieve list name: " + error.getMessage());
+                    return null;
+                });
+    }
+
     private void scheduleNotification() {
 
-        String message = "hello";
+        String message = String.format("Remember to check your \"%s\" list", list_name);
 
         Calendar schedule_time = Calendar.getInstance();
         schedule_time.set(selected_year, selected_month, selected_day, selected_hour, selected_minute, 0);
 
-        Intent notification_intent = new Intent(Alert_Scheduling.this, NotificationReceiver.class);
+        Intent notification_intent = new Intent(Alert_Scheduling.this, Notification_Receiver.class);
         notification_intent.putExtra("message", message);
 
         int request_code = (int)System.currentTimeMillis();
@@ -171,6 +193,11 @@ public class Alert_Scheduling extends AppCompatActivity {
 
             NotificationManager notification_manager = getSystemService(NotificationManager.class);
             notification_manager.createNotificationChannel(channel);
+
+            Intent intent = new Intent(Alert_Scheduling.this, Present_Lists.class);
+            intent.putExtra("Uid", Uid);
+            intent.putExtra("list_id", list_id);
+            startActivity(intent);
 
         }
     }
