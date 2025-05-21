@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -38,10 +40,14 @@ public class Alert_Scheduling extends AppCompatActivity {
     private int selected_hour = -1;
     private int selected_minute = -1;
 
+    private Utilities utilities;
+
     private void init() {
         date = findViewById(R.id.date);
         time = findViewById(R.id.time);
         schedule = findViewById(R.id.schedule);
+
+        utilities = new Utilities();
     }
 
     @Override
@@ -51,17 +57,18 @@ public class Alert_Scheduling extends AppCompatActivity {
 
         init();
 
-        ActivityCompat.requestPermissions(Alert_Scheduling.this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 100);
+        ActivityCompat.requestPermissions(Alert_Scheduling.this, new String[]{Manifest.permission.POST_NOTIFICATIONS},100);
 
         calendar = Calendar.getInstance();
 
         date.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DatePickerDialog date_picker_dialog = new DatePickerDialog(Alert_Scheduling.this, (v, year, month, day_of_month) -> {
-                    selected_year = year;
-                    selected_month = month;
-                    selected_day = day_of_month;
+                DatePickerDialog date_picker_dialog = new DatePickerDialog(Alert_Scheduling.this,
+                    (v, year, month, day_of_month) -> {
+                        selected_year = year;
+                        selected_month = month;
+                        selected_day = day_of_month;
 
                     Toast.makeText(
                             Alert_Scheduling.this,
@@ -86,15 +93,19 @@ public class Alert_Scheduling extends AppCompatActivity {
                     selected_minute = calendar.get(Calendar.MINUTE);
                 }
 
-                TimePickerDialog time_picker_dialog = new TimePickerDialog(Alert_Scheduling.this, (v, hour_of_day, minute) -> {
-                    selected_hour = hour_of_day;
-                    selected_minute = minute;
+                TimePickerDialog time_picker_dialog = new TimePickerDialog(Alert_Scheduling.this,
+                    (v, hour_of_day, minute) -> {
+                        selected_hour = hour_of_day;
+                        selected_minute = minute;
 
                     Toast.makeText(
                             Alert_Scheduling.this,
                             "Time: " + selected_hour + ":" + selected_minute,
                             Toast.LENGTH_LONG
                     ).show();
+
+                    calendar.set(Calendar.HOUR_OF_DAY, selected_hour);
+                    calendar.set(Calendar.MINUTE, selected_minute);
                 },
                     selected_hour,
                     selected_minute,
@@ -116,6 +127,7 @@ public class Alert_Scheduling extends AppCompatActivity {
     }
 
     private void scheduleNotification() {
+
         String message = "hello";
 
         Calendar schedule_time = Calendar.getInstance();
@@ -126,7 +138,7 @@ public class Alert_Scheduling extends AppCompatActivity {
 
         int request_code = (int)System.currentTimeMillis();
 
-        notification_intent.setAction("com.ariellebarlev.listmate.NOTIFICATION_ACTION_" + request_code);
+        notification_intent.setAction("com.ariellebarlev.listmate.ACTION" + request_code);
 
         PendingIntent pending_intent = PendingIntent.getBroadcast(
                 Alert_Scheduling.this,
@@ -147,6 +159,9 @@ public class Alert_Scheduling extends AppCompatActivity {
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            utilities.make_snackbar(Alert_Scheduling.this, "hello");
+
             CharSequence name = "NotificationChannel";
             String description = "Channel for scheduled notifications";
             int importance = NotificationManager.IMPORTANCE_HIGH;

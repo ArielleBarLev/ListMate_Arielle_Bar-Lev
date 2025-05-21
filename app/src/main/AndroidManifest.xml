@@ -16,11 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ListMate_Arielle_BarLev"
         tools:targetApi="31">
+
         <activity
             android:name=".Alert_Scheduling"
-            android:exported="false" />
-        <activity
-            android:name=".Present_Items"
             android:exported="false" />
         <activity
             android:name=".Present_Items"
@@ -43,6 +41,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".NotificationReceiver" />
+
     </application>
 
 </manifest>
