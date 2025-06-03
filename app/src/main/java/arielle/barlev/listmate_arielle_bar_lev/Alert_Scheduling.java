@@ -194,7 +194,7 @@ public class Alert_Scheduling extends AppCompatActivity {
             NotificationManager notification_manager = getSystemService(NotificationManager.class);
             notification_manager.createNotificationChannel(channel);
 
-            Intent intent = new Intent(Alert_Scheduling.this, Present_Lists.class);
+            Intent intent = new Intent(Alert_Scheduling.this, Home.class);
             intent.putExtra("Uid", Uid);
             intent.putExtra("list_id", list_id);
             startActivity(intent);

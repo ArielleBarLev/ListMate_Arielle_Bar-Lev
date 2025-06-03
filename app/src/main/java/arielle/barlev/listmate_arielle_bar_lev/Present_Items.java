@@ -119,7 +119,7 @@ public class Present_Items extends AppCompatActivity {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Present_Items.this, Present_Lists.class);
+                Intent intent = new Intent(Present_Items.this, Home.class);
                 intent.putExtra("Uid", Uid);
                 startActivity(intent);
             }

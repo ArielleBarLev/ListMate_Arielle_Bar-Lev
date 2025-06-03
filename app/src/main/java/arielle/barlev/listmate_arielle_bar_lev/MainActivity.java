@@ -6,19 +6,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -68,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                 sign_up_future.thenAccept(uid -> {
                     utilities.make_snackbar(MainActivity.this, uid);
 
-                    Intent intent = new Intent(MainActivity.this, Present_Lists.class);
+                    Intent intent = new Intent(MainActivity.this, Home.class);
                     intent.putExtra("Uid", uid);
                     startActivity(intent);
                 }).exceptionally(ex -> {
@@ -97,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
                 login_future.thenAccept(uid -> {
                     utilities.make_snackbar(MainActivity.this, "success");
 
-                    Intent intent = new Intent(MainActivity.this, Present_Lists.class);
+                    Intent intent = new Intent(MainActivity.this, Home.class);
                     intent.putExtra("Uid", uid);
                     startActivity(intent);
                 }).exceptionally(ex -> {

@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    xmlns:tools="http://schemas. abhor.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Present_Lists">
-
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="47dp"
-        android:text="Your Lists:"
-        app:layout_constraintBottom_toTopOf="@+id/lists_layout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    tools:context=".HomeFragment"> <TextView
+    android:id="@+id/title"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    android:text="Your Lists:"
+    android:textSize="24sp"
+    android:textStyle="bold"
+    android:gravity="center_horizontal"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintBottom_toTopOf="@+id/lists_layout"
+    app:layout_constraintVertical_chainStyle="packed" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/lists_layout"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="109dp"
         android:layout_weight="1"
-        app:layout_constraintBottom_toTopOf="@+id/add_list"
+        android:padding="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/add_list_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title" />
 
     <Button
-        android:id="@+id/add_list"
+        android:id="@+id/add_list_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="298dp"
+        android:layout_marginBottom="16dp"
         android:text="Add List"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

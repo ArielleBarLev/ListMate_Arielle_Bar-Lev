@@ -6,14 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 public class Add_List extends AppCompatActivity {
 
@@ -53,7 +46,7 @@ public class Add_List extends AppCompatActivity {
 
                 helper.create_list(Uid, list_name_content);
 
-                Intent intent = new Intent(Add_List.this, Present_Lists.class);
+                Intent intent = new Intent(Add_List.this, Home.class);
                 intent.putExtra("Uid", Uid);
                 startActivity(intent);
             }

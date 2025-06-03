@@ -1,33 +1,36 @@
 package arielle.barlev.listmate_arielle_bar_lev;
 
-import static android.content.ContentValues.TAG;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.os.Handler;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Present_Lists extends AppCompatActivity {
+public class Present_lists extends Fragment {
 
-    private Button add_list;
+    private Button add_list_button;
 
     private String Uid;
 
@@ -44,6 +47,23 @@ public class Present_Lists extends AppCompatActivity {
     private AtomicBoolean is_fetching_data = new AtomicBoolean(false);
     private static final long UPDATE_INTERVAL = 5000;
 
+    private void init(View view) {
+        lists_layout = view.findViewById(R.id.lists_layout);
+
+        add_list_button = view.findViewById(R.id.add_list_button);
+
+        Bundle args = getArguments();
+        if (args != null) {
+            Uid = args.getString("Uid");
+        }
+
+        lists_names = new ArrayList<>();
+        lists_ids = new ArrayList<>();
+
+        helper = new Firebase_Helper(requireContext());
+        utilities = new Utilities();
+    }
+
     private Runnable data_update_runnable = new Runnable() {
         @Override
         public void run() {
@@ -52,28 +72,17 @@ public class Present_Lists extends AppCompatActivity {
         }
     };
 
-    private void init() {
-        lists_layout = findViewById(R.id.lists_layout);
-        add_list = findViewById(R.id.add_list);
-
-        Intent intent = getIntent();
-        Uid = intent.getStringExtra("Uid");
-
-        lists_names = new ArrayList<>();
-        lists_ids = new ArrayList<>();
-
-        helper = new Firebase_Helper(Present_Lists.this);
-        utilities = new Utilities();
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_present_lists, container, false);
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_present_lists);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        init(view);
 
-        init();
-
-        LinearLayoutManager layout_manager = new LinearLayoutManager(Present_Lists.this);
+        LinearLayoutManager layout_manager = new LinearLayoutManager(requireContext());
         lists_layout.setLayoutManager(layout_manager);
 
         adapter = new Lists_Names_Adapter(lists_names);
@@ -85,13 +94,13 @@ public class Present_Lists extends AppCompatActivity {
                 int position = lists_names.indexOf(list_name);
                 if (position != -1 && position < lists_ids.size()) {
                     String list_id = lists_ids.get(position);
-                    utilities.make_snackbar(Present_Lists.this, "Clicked List: " + list_name + " (ID: " + list_id + ")");
-                    Intent intent = new Intent(Present_Lists.this, Present_Items.class);
+                    utilities.make_snackbar(requireContext(), "Clicked List: " + list_name + " (ID: " + list_id + ")");
+                    Intent intent = new Intent(requireContext(), Present_Items.class);
                     intent.putExtra("Uid", Uid);
                     intent.putExtra("list_id", list_id);
                     startActivity(intent);
                 } else {
-                    utilities.make_snackbar(Present_Lists.this, "Error: Invalid list item clicked.");
+                    utilities.make_snackbar(requireContext(), "Error: Invalid list item clicked.");
                 }
             }
         });
@@ -102,12 +111,14 @@ public class Present_Lists extends AppCompatActivity {
                 int position = lists_names.indexOf(list_name);
                 if (position != -1 && position < lists_ids.size()) {
                     String list_id = lists_ids.get(position);
-                    utilities.make_snackbar(Present_Lists.this, "Share: " + list_id);
+                    utilities.make_snackbar(requireContext(), "Share: " + list_id);
 
-                    Context context = Present_Lists.this;
+                    Context context = requireContext();
+
                     AlertDialog.Builder alert_dialog_builder = new AlertDialog.Builder(context);
                     alert_dialog_builder.setTitle("Share list:");
-                    final EditText text_box = new EditText(getApplicationContext());
+
+                    final EditText text_box = new EditText(context);
                     text_box.setInputType(InputType.TYPE_CLASS_TEXT);
                     text_box.setHint("Enter user id");
                     text_box.setWidth(100);
@@ -127,7 +138,7 @@ public class Present_Lists extends AppCompatActivity {
                     alert_dialog_builder.create().show();
 
                 } else {
-                    utilities.make_snackbar(Present_Lists.this, "Error: Could not find list ID for sharing.");
+                    utilities.make_snackbar(requireContext(), "Error: Could not find list ID for sharing.");
                 }
             }
         });
@@ -138,21 +149,21 @@ public class Present_Lists extends AppCompatActivity {
                 int position = lists_names.indexOf(list_name);
                 if (position != -1 && position < lists_ids.size()) {
                     String list_id = lists_ids.get(position);
-                    utilities.make_snackbar(Present_Lists.this, "Clicked List: " + list_name + " (ID: " + list_id + ")");
-                    Intent intent = new Intent(Present_Lists.this, Alert_Scheduling.class);
+                    utilities.make_snackbar(requireContext(), "Clicked List: " + list_name + " (ID: " + list_id + ")");
+                    Intent intent = new Intent(requireContext(), Alert_Scheduling.class);
                     intent.putExtra("Uid", Uid);
                     intent.putExtra("list_id", list_id);
                     startActivity(intent);
                 } else {
-                    utilities.make_snackbar(Present_Lists.this, "Error: Invalid list item clicked.");
+                    utilities.make_snackbar(requireContext(), "Error: Invalid list item clicked.");
                 }
             }
         });
 
-        add_list.setOnClickListener(new View.OnClickListener() {
+        add_list_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Present_Lists.this, Add_List.class);
+                Intent intent = new Intent(requireContext(), Add_List.class);
                 intent.putExtra("Uid", Uid);
                 startActivity(intent);
             }
@@ -160,14 +171,14 @@ public class Present_Lists extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         fetch_display_data();
         handler.postDelayed(data_update_runnable, 0);
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         handler.removeCallbacks(data_update_runnable);
     }
@@ -176,11 +187,11 @@ public class Present_Lists extends AppCompatActivity {
         if (is_fetching_data.compareAndSet(false, true)) {
             helper.users_lists(Uid).thenAccept(retrieved_list_ids -> {
                 if (retrieved_list_ids.isEmpty()) {
-                    runOnUiThread(() -> {
+                    requireActivity().runOnUiThread(() -> {
                         lists_names.clear();
                         lists_ids.clear();
                         adapter.notifyDataSetChanged();
-                        utilities.make_snackbar(Present_Lists.this, "No lists found for this user.");
+                        utilities.make_snackbar(requireContext(), "No lists found for this user.");
                         is_fetching_data.set(false);
                     });
                 } else {
@@ -199,11 +210,11 @@ public class Present_Lists extends AppCompatActivity {
                                     retrieved_names.add(name);
                                 }
                             } catch (InterruptedException | ExecutionException e) {
-                                utilities.make_snackbar(Present_Lists.this, "Error getting list name: " + e.getMessage());
+                                utilities.make_snackbar(requireContext(), "Error getting list name: " + e.getMessage());
                             }
                         }
 
-                        runOnUiThread(() -> {
+                        requireActivity().runOnUiThread(() -> {
                             lists_names.clear();
                             lists_names.addAll(retrieved_names);
                             lists_ids.clear();
@@ -212,18 +223,19 @@ public class Present_Lists extends AppCompatActivity {
                             is_fetching_data.set(false);
                         });
                     }).exceptionally(e -> {
-                        utilities.make_snackbar(Present_Lists.this, "Failed to fetch list names: " + e.getMessage());
+                        utilities.make_snackbar(requireContext(), "Failed to fetch list names: " + e.getMessage());
                         is_fetching_data.set(false);
                         return null;
                     });
                 }
             }).exceptionally(e -> {
-                utilities.make_snackbar(Present_Lists.this, "Failed to fetch list IDs: " + e.getMessage());
+                utilities.make_snackbar(requireContext(), "Failed to fetch list IDs: " + e.getMessage());
                 is_fetching_data.set(false);
                 return null;
             });
         } else {
-            utilities.make_snackbar(Present_Lists.this, "fetch_display_data() - already fetching data, skipping");
+            utilities.make_snackbar(requireContext(), "fetch_display_data() - already fetching data, skipping");
         }
     }
+
 }
