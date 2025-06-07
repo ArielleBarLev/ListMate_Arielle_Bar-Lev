@@ -2,50 +2,38 @@ package arielle.barlev.listmate_arielle_bar_lev;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.os.Handler;
+import android.os.Looper;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class Present_Items extends AppCompatActivity {
+public class Present_Items extends Fragment {
 
     private TextView title;
     private RecyclerView recycler_view_items;
 
-    private Button add_item;
-    private Button back;
-
     private String Uid;
     private String list_id;
-    private String list_name;
 
     private Items_Adapter adapter;
     private Firebase_Helper helper;
@@ -53,118 +41,152 @@ public class Present_Items extends AppCompatActivity {
 
     private List<Map.Entry<String, Boolean>> current_items_list;
 
-    private Handler handler = new Handler();
+    private Handler handler = new Handler(Looper.getMainLooper());
     private static final long UPDATE_INTERVAL = 5000;
 
     private Runnable data_update_runnable = new Runnable() {
         @Override
         public void run() {
-            fetch_list_items();
-            handler.postDelayed(this, UPDATE_INTERVAL);
+            if (isAdded()) {
+                fetch_list_items();
+                handler.postDelayed(this, UPDATE_INTERVAL);
+            } else {
+                handler.removeCallbacks(this);
+            }
         }
     };
 
-    private void init() {
-        recycler_view_items = findViewById(R.id.recycler_view_items);
-        recycler_view_items.setLayoutManager(new LinearLayoutManager(this));
+    private void init(View view) {
+        recycler_view_items = view.findViewById(R.id.recycler_view_items);
+        recycler_view_items.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        title = findViewById(R.id.title);
-        add_item = findViewById(R.id.add_item);
-        back = findViewById(R.id.back);
+        title = view.findViewById(R.id.title);
 
-        Intent intent = getIntent();
-        Uid = intent.getStringExtra("Uid");
-        list_id = intent.getStringExtra("list_id");
-
-        helper = new Firebase_Helper(Present_Items.this);
+        helper = new Firebase_Helper(requireContext());
         utilities = new Utilities();
 
-        current_items_list = new ArrayList<>();
+        Bundle args = getArguments();
+        if (args != null) {
+            Uid = args.getString("Uid");
+            list_id = args.getString("list_id");
+        } else {
+            if (getContext() != null) {
+                utilities.make_snackbar(getContext(), "Error: Uid or list_id arguments are missing.");
+            }
+        }
 
-        helper.get_list_name(list_id)
-                .thenAccept(listName -> {
+        current_items_list = new ArrayList<>();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_present_items, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        init(view);
+
+        if (list_id != null) {
+            helper.get_list_name(list_id).thenAccept(listName -> {
+                if (getContext() != null) {
                     if (listName != null) {
                         title.setText(listName);
-                        utilities.make_snackbar(Present_Items.this, "Retrieved list name: " + listName);
+                        utilities.make_snackbar(getContext(), "Retrieved list name: " + listName);
                     } else {
-                        utilities.make_snackbar(Present_Items.this, "List name not found for ID: " + list_id);
+                        utilities.make_snackbar(getContext(), "List name not found for ID: " + list_id);
                     }
-                })
-                .exceptionally(error -> {
-                    utilities.make_snackbar(Present_Items.this, "Failed to retrieve list name: " + error.getMessage());
-                    return null;
-                });
-    }
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_present_items);
-
-        init();
-
-        //fetch_list_items();
-
-        add_item.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Present_Items.this, Add_Item.class);
-                intent.putExtra("Uid", Uid);
-                intent.putExtra("list_id", list_id);
-                startActivity(intent);
-            }
-        });
-
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Present_Items.this, Home.class);
-                intent.putExtra("Uid", Uid);
-                startActivity(intent);
-            }
-        });
+                }
+            }).exceptionally(error -> {
+                if (getContext() != null) {
+                    utilities.make_snackbar(getContext(), "Failed to retrieve list name: " + error.getMessage());
+                }
+                return null;
+            });
+        } else {
+            utilities.make_snackbar(getContext(), "Error: List ID not provided to fragment.");
+        }
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
-        handler.postDelayed(data_update_runnable, 0);
+
+        if (list_id != null && getContext() != null) {
+            handler.postDelayed(data_update_runnable, 0);
+        } else if (getContext() != null) {
+            utilities.make_snackbar(getContext(), "Warning: Cannot fetch items, list ID is null or view not ready (onResume).");
+        }
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         handler.removeCallbacks(data_update_runnable);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        title = null;
+        recycler_view_items = null;
+        adapter = null;
+        handler.removeCallbacks(data_update_runnable);
+    }
+
     private void fetch_list_items() {
+        if (list_id == null) {
+            if (getContext() != null) {
+                utilities.make_snackbar(getContext(), "Warning: fetch_list_items called with null list_id.");
+            }
+            return;
+        }
+
         helper.lists_items(list_id).thenAccept(itemsMap -> {
-            current_items_list.clear();
-            current_items_list.addAll(itemsMap.entrySet());
-            runOnUiThread(() -> {
-                if (adapter == null) {
-                    adapter = new Items_Adapter(current_items_list);
-                    setup_item_click_listeners(); // Set up listeners after adapter is created
-                    recycler_view_items.setAdapter(adapter);
-                } else {
-                    adapter.notifyDataSetChanged(); // Just refresh the adapter if data changes
-                }
-            });
+            if (getContext() != null) {
+                current_items_list.clear();
+                current_items_list.addAll(itemsMap.entrySet());
+                requireActivity().runOnUiThread(() -> {
+                    if (getView() != null && recycler_view_items != null) {
+                        if (adapter == null) {
+                            adapter = new Items_Adapter(current_items_list);
+                            setup_item_click_listeners();
+                            recycler_view_items.setAdapter(adapter);
+                        } else {
+                            adapter.notifyDataSetChanged();
+                        }
+                    } else {
+                        if (getContext() != null) {
+                            utilities.make_snackbar(getContext(), "Warning: UI components not available for item list update.");
+                        }
+                    }
+                });
+            }
         }).exceptionally(e -> {
-            Log.e("FirebaseError", "Failed to fetch items: " + e.getMessage());
-            runOnUiThread(() ->
-                    utilities.make_snackbar(Present_Items.this, "Failed to load data: " + e.getMessage()));
+            if (getContext() != null) {
+                utilities.make_snackbar(getContext(), "Failed to fetch items: " + e.getMessage());
+            }
             return null;
         });
     }
 
     private void setup_item_click_listeners() {
+        if (adapter == null) {
+            if (getContext() != null) {
+                utilities.make_snackbar(getContext(), "Error: Adapter is null, cannot set item click listeners.");
+            }
+            return;
+        }
+
         adapter.setOnItemClickListener(item -> {
-            Context context = Present_Items.this;
+            Context context = requireContext();
             AlertDialog.Builder alert_dialog_builder = new AlertDialog.Builder(context);
             alert_dialog_builder.setTitle("Update Item:");
-            final EditText text_box = new EditText(getApplicationContext());
+            final EditText text_box = new EditText(context);
             text_box.setInputType(InputType.TYPE_CLASS_TEXT);
             text_box.setHint("Enter new item name");
             text_box.setWidth(100);
@@ -177,17 +199,19 @@ public class Present_Items extends AppCompatActivity {
                 String new_item = text_box.getText().toString().trim();
                 if (!new_item.isEmpty()) {
                     helper.update_item(list_id, item, new_item);
-                    adapter.updateItemName(item, new_item); // Update the UI locally
+                    adapter.updateItemName(item, new_item);
                 } else {
                     Toast.makeText(context, "Please enter an item name", Toast.LENGTH_SHORT).show();
                 }
             });
+            alert_dialog_builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
             alert_dialog_builder.create().show();
         });
 
         adapter.setOnTrashClickListener(item -> {
             helper.delete_item(list_id, item);
-            adapter.deleteItem(item); // Update the UI locally
+            adapter.deleteItem(item);
+            utilities.make_snackbar(getContext(), "Item deleted.");
         });
 
         adapter.setOnCircleClickListener(item -> {
@@ -198,6 +222,9 @@ public class Present_Items extends AppCompatActivity {
                     adapter.notifyItemChanged(i);
                     break;
                 }
+            }
+            if (getContext() != null) {
+                utilities.make_snackbar(getContext(), "Item status updated.");
             }
         });
     }

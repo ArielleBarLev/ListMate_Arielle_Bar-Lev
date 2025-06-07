@@ -1,23 +1,19 @@
 package arielle.barlev.listmate_arielle_bar_lev;
 
-import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import java.util.concurrent.CompletableFuture;
-
-public class Add_Item extends AppCompatActivity {
-
-    private TextView title;
+public class Add_Item extends Fragment {
 
     private EditText item;
 
@@ -25,61 +21,53 @@ public class Add_Item extends AppCompatActivity {
 
     private String Uid;
     private String list_id;
-    private String list_name;
 
     private Firebase_Helper helper;
     private Utilities utilities;
 
-    private void init() {
-        title = findViewById(R.id.title);
+    private void init(View view) {
+        item = view.findViewById(R.id.item);
+        create = view.findViewById(R.id.create);
 
-        item = findViewById(R.id.item);
+        Bundle args = getArguments();
+        if (args != null) {
+            Uid = args.getString("Uid");
+            list_id = args.getString("list_id");
+        }
 
-        create = findViewById(R.id.create);
-
-        Intent intent = getIntent();
-        Uid = intent.getStringExtra("Uid");
-        list_id = intent.getStringExtra("list_id");
-
-        helper = new Firebase_Helper(Add_Item.this);
+        helper = new Firebase_Helper(requireContext());
         utilities = new Utilities();
-
-        helper.get_list_name(list_id)
-                .thenAccept(listName -> {
-                    if (listName != null) {
-                        utilities.make_snackbar(Add_Item.this, "Retrieved list name: " + listName);
-                    } else {
-                        utilities.make_snackbar(Add_Item.this, "List name not found for ID: " + list_id);
-                    }
-                })
-                .exceptionally(error -> {
-                    utilities.make_snackbar(Add_Item.this, "Failed to retrieve list name: " + error.getMessage());
-                    return null;
-                });
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_item);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_add__item, container, false);
+    }
 
-        init();
-
-        title.setText(list_name);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        init(view);
 
         create.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String item_content = item.getText().toString();
+                String item_content = item.getText().toString().trim();
 
-                utilities.make_snackbar(Add_Item.this, list_id);
+                if (item_content.isEmpty()) {
+                    utilities.make_snackbar(requireContext(), "List name cannot be empty.");
+                    return;
+                }
 
                 helper.add_item(list_id, item_content, false);
 
-                Intent intent = new Intent(Add_Item.this, Present_Items.class);
-                intent.putExtra("Uid", Uid);
-                intent.putExtra("list_id", list_id);
-                startActivity(intent);
+                if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                    getParentFragmentManager().popBackStack();
+                    utilities.make_snackbar(requireContext(), "Item added!");
+                } else {
+                    utilities.make_snackbar(requireContext(), "Item! Please navigate back.");
+                }
             }
         });
     }

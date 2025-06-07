@@ -18,7 +18,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -29,8 +28,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Present_lists extends Fragment {
-
-    private Button add_list_button;
 
     private String Uid;
 
@@ -50,8 +47,6 @@ public class Present_lists extends Fragment {
     private void init(View view) {
         lists_layout = view.findViewById(R.id.lists_layout);
 
-        add_list_button = view.findViewById(R.id.add_list_button);
-
         Bundle args = getArguments();
         if (args != null) {
             Uid = args.getString("Uid");
@@ -67,8 +62,12 @@ public class Present_lists extends Fragment {
     private Runnable data_update_runnable = new Runnable() {
         @Override
         public void run() {
-            fetch_display_data();
-            handler.postDelayed(this, UPDATE_INTERVAL);
+            if (isAdded()) {
+                fetch_display_data();
+                handler.postDelayed(this, UPDATE_INTERVAL);
+            } else {
+                handler.removeCallbacks(this);
+            }
         }
     };
 
@@ -80,6 +79,8 @@ public class Present_lists extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         init(view);
 
         LinearLayoutManager layout_manager = new LinearLayoutManager(requireContext());
@@ -95,12 +96,14 @@ public class Present_lists extends Fragment {
                 if (position != -1 && position < lists_ids.size()) {
                     String list_id = lists_ids.get(position);
                     utilities.make_snackbar(requireContext(), "Clicked List: " + list_name + " (ID: " + list_id + ")");
-                    Intent intent = new Intent(requireContext(), Present_Items.class);
-                    intent.putExtra("Uid", Uid);
-                    intent.putExtra("list_id", list_id);
-                    startActivity(intent);
+
+                    if (getActivity() instanceof Home) {
+                        ((Home) getActivity()).load_fragment(new Present_Items(), Uid, list_id);
+                    }
                 } else {
-                    utilities.make_snackbar(requireContext(), "Error: Invalid list item clicked.");
+                    if (getContext() != null) {
+                        utilities.make_snackbar(getContext(), "Error: Cannot navigate, host activity not recognized.");
+                    }
                 }
             }
         });
@@ -159,15 +162,6 @@ public class Present_lists extends Fragment {
                 }
             }
         });
-
-        add_list_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(requireContext(), Add_List.class);
-                intent.putExtra("Uid", Uid);
-                startActivity(intent);
-            }
-        });
     }
 
     @Override
@@ -183,58 +177,88 @@ public class Present_lists extends Fragment {
         handler.removeCallbacks(data_update_runnable);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        lists_layout = null;
+        adapter = null;
+        handler.removeCallbacks(data_update_runnable);
+    }
+
     private void fetch_display_data() {
         if (is_fetching_data.compareAndSet(false, true)) {
             helper.users_lists(Uid).thenAccept(retrieved_list_ids -> {
-                if (retrieved_list_ids.isEmpty()) {
-                    requireActivity().runOnUiThread(() -> {
-                        lists_names.clear();
-                        lists_ids.clear();
-                        adapter.notifyDataSetChanged();
-                        utilities.make_snackbar(requireContext(), "No lists found for this user.");
-                        is_fetching_data.set(false);
-                    });
-                } else {
-                    List<CompletableFuture<String>> name_futures = new ArrayList<>();
-                    for (String id : retrieved_list_ids) {
-                        name_futures.add(helper.get_list_name(id));
-                    }
-
-                    CompletableFuture.allOf(name_futures.toArray(new CompletableFuture[0])).thenAccept(v -> {
-                        List<String> retrieved_names = new ArrayList<>();
-
-                        for (CompletableFuture<String> name_future : name_futures) {
-                            try {
-                                String name = name_future.get();
-                                if (name != null) {
-                                    retrieved_names.add(name);
-                                }
-                            } catch (InterruptedException | ExecutionException e) {
-                                utilities.make_snackbar(requireContext(), "Error getting list name: " + e.getMessage());
-                            }
-                        }
-
+                if (isAdded()) {
+                    if (retrieved_list_ids.isEmpty()) {
                         requireActivity().runOnUiThread(() -> {
-                            lists_names.clear();
-                            lists_names.addAll(retrieved_names);
-                            lists_ids.clear();
-                            lists_ids.addAll(retrieved_list_ids);
-                            adapter.notifyDataSetChanged();
+                            if (isAdded() && getView() != null) {
+                                lists_names.clear();
+                                lists_ids.clear();
+                                adapter.notifyDataSetChanged();
+                                utilities.make_snackbar(requireContext(), "No lists found for this user.");
+                            }
                             is_fetching_data.set(false);
                         });
-                    }).exceptionally(e -> {
-                        utilities.make_snackbar(requireContext(), "Failed to fetch list names: " + e.getMessage());
-                        is_fetching_data.set(false);
-                        return null;
-                    });
+                    } else {
+                        List<CompletableFuture<String>> name_futures = new ArrayList<>();
+                        for (String id : retrieved_list_ids) {
+                            name_futures.add(helper.get_list_name(id));
+                        }
+
+                        CompletableFuture.allOf(name_futures.toArray(new CompletableFuture[0])).thenAccept(v -> {
+                            if (isAdded()) {
+                                List<String> retrieved_names = new ArrayList<>();
+
+                                for (CompletableFuture<String> name_future : name_futures) {
+                                    try {
+                                        String name = name_future.get();
+                                        if (name != null) {
+                                            retrieved_names.add(name);
+                                        }
+                                    } catch (InterruptedException | ExecutionException e) {
+                                        if (getContext() != null) {
+                                            utilities.make_snackbar(getContext(), "Error getting list name: " + e.getMessage());
+                                        }
+                                    }
+                                }
+
+                                requireActivity().runOnUiThread(() -> {
+                                    if (isAdded() && getView() != null) {
+                                        lists_names.clear();
+                                        lists_names.addAll(retrieved_names);
+                                        lists_ids.clear();
+                                        lists_ids.addAll(retrieved_list_ids);
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                    is_fetching_data.set(false);
+                                });
+                            } else {
+                                is_fetching_data.set(false);
+                            }
+                        }).exceptionally(e -> {
+                            // Changed: Use getContext() for Snackbar
+                            if (getContext() != null) {
+                                utilities.make_snackbar(getContext(), "Failed to fetch list names: " + e.getMessage());
+                            }
+                            is_fetching_data.set(false);
+                            return null;
+                        });
+                    }
+                } else {
+                    is_fetching_data.set(false);
                 }
             }).exceptionally(e -> {
-                utilities.make_snackbar(requireContext(), "Failed to fetch list IDs: " + e.getMessage());
+                if (getContext() != null) {
+                    utilities.make_snackbar(getContext(), "Failed to fetch list IDs: " + e.getMessage());
+                }
                 is_fetching_data.set(false);
                 return null;
             });
         } else {
-            utilities.make_snackbar(requireContext(), "fetch_display_data() - already fetching data, skipping");
+            // Changed: Use getContext() for Snackbar
+            if (getContext() != null) {
+                utilities.make_snackbar(getContext(), "fetch_display_data() - already fetching data, skipping");
+            }
         }
     }
 

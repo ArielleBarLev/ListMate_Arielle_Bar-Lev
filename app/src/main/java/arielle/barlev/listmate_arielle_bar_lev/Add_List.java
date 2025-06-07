@@ -1,55 +1,83 @@
 package arielle.barlev.listmate_arielle_bar_lev;
 
-import android.content.Intent;
+import android.content.Context;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-public class Add_List extends AppCompatActivity {
+public class Add_List extends Fragment {
 
     private EditText list_name;
-
     private Button create;
-
     private Firebase_Helper helper;
     private Utilities utilities;
-
     private String Uid;
 
-    private void init() {
+    private void init(View view) {
+        list_name = view.findViewById(R.id.list_name);
+        create = view.findViewById(R.id.create);
 
-        list_name = findViewById(R.id.list_name);
+        Bundle args = getArguments();
+        if (args != null) {
+            Uid = args.getString("Uid");
+        }
 
-        create = findViewById(R.id.create);
-
-        Intent intent = getIntent();
-        Uid = intent.getStringExtra("Uid");
-
-        helper = new Firebase_Helper(Add_List.this);
+        helper = new Firebase_Helper(requireContext());
         utilities = new Utilities();
     }
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_list);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_add_list, container, false);
+    }
 
-        init();
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        init(view);
 
         create.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String list_name_content = list_name.getText().toString();
+                String list_name_content = list_name.getText().toString().trim();
+
+                if (list_name_content.isEmpty()) {
+                    utilities.make_snackbar(requireContext(), "List name cannot be empty.");
+                    return;
+                }
 
                 helper.create_list(Uid, list_name_content);
 
-                Intent intent = new Intent(Add_List.this, Home.class);
-                intent.putExtra("Uid", Uid);
-                startActivity(intent);
+                if (getParentFragmentManager().getBackStackEntryCount() > 0) {
+                    getParentFragmentManager().popBackStack();
+                    utilities.make_snackbar(requireContext(), "List created!");
+                } else {
+                    utilities.make_snackbar(requireContext(), "List created! Please navigate back.");
+                }
             }
         });
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        // This is called when the fragment is attached to its host activity.
+        // You can get a reference to the activity here if needed for direct communication.
+    }
+
+    // Changed: Optional: Override onDetach to release context reference
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        // This is called when the fragment is detached from its host activity.
     }
 }
