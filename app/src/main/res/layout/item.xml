@@ -10,33 +10,21 @@
         android:id="@+id/item_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="39dp"
+        android:layout_marginStart="23dp"
         android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/item_value"
-        app:layout_constraintStart_toEndOf="@+id/icon_circle"
-        app:layout_constraintTop_toTopOf="@+id/item_value"
-        tools:text="Item Name" />
-
-    <TextView
-        android:id="@+id/item_value"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="39dp"
-        android:textSize="18sp"
-        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/icon_trash"
-        app:layout_constraintStart_toEndOf="@+id/item_name"
+        app:layout_constraintStart_toEndOf="@+id/icon_circle"
         app:layout_constraintTop_toTopOf="@+id/icon_trash"
-        tools:text="true" />
+        tools:text="Item Name" />
 
     <ImageView
         android:id="@+id/icon_trash"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="39dp"
+        android:layout_marginStart="24dp"
         android:src="@android:drawable/ic_menu_delete"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/item_value"
+        app:layout_constraintStart_toEndOf="@+id/item_name"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="ContentDescription" />
 
@@ -44,11 +32,11 @@
         android:id="@+id/icon_circle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="40dp"
         android:src="@android:drawable/checkbox_off_background"
-        app:layout_constraintBottom_toBottomOf="@+id/item_name"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/item_name"
+        app:layout_constraintTop_toTopOf="parent"
         tools:ignore="ContentDescription" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -122,7 +122,12 @@ public class Items_Adapter extends RecyclerView.Adapter<Items_Adapter.ViewHolder
         Boolean item_value = itemEntry.getValue();
 
         holder.item_name.setText(item_name);
-        holder.item_value.setText(String.valueOf(item_value));
+
+        if (item_value) {
+            holder.icon_circle.setImageResource(android.R.drawable.checkbox_on_background);
+        } else {
+            holder.icon_circle.setImageResource(android.R.drawable.checkbox_off_background);
+        }
 
         holder.itemView.setOnClickListener(v -> {
             if (_listener != null) {
@@ -151,14 +156,12 @@ public class Items_Adapter extends RecyclerView.Adapter<Items_Adapter.ViewHolder
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView item_name;
-        public TextView item_value;
         public ImageView icon_trash;
         public ImageView icon_circle;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             item_name = itemView.findViewById(R.id.item_name);
-            item_value = itemView.findViewById(R.id.item_value);
             icon_trash = itemView.findViewById(R.id.icon_trash);
             icon_circle = itemView.findViewById(R.id.icon_circle);
         }
