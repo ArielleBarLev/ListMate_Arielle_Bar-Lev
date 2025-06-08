@@ -1,5 +1,6 @@
 package arielle.barlev.listmate_arielle_bar_lev;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -16,6 +17,8 @@ public class Home extends AppCompatActivity {
 
     private String Uid;
     private BottomNavigationView bottom_navigation_view;
+
+    private Firebase_Helper helper = new Firebase_Helper(Home.this);
 
     private BottomNavigationView.OnNavigationItemSelectedListener navigation_listener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -45,7 +48,11 @@ public class Home extends AppCompatActivity {
                             Toast.makeText(Home.this, "Add button clicked from an unrecognized screen.", Toast.LENGTH_SHORT).show();
                         }
                     } else if (itemId == R.id.nav_logout) {
-                        logout();
+                        helper.logout();
+
+                        Intent intent = new Intent(Home.this, MainActivity.class);
+                        startActivity(intent);
+
                         return true;
                     }
                     return false;

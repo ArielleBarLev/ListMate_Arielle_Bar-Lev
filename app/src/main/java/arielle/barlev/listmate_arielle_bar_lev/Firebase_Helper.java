@@ -189,6 +189,16 @@ public class Firebase_Helper {
     }
 
     /*
+        A function to perform logout
+        Input: none
+        Return value: none
+     */
+    public void logout() {
+        _firebase_auth.signOut();
+        _utilities.make_snackbar(_context, "Logged out successfully.");
+    }
+
+    /*
         A function to create new list.
         Input: user's id, list's name
         Return value: none
