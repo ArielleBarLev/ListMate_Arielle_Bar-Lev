@@ -13,7 +13,7 @@ public class Notification_Receiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String message = intent.getStringExtra("message");
 
-        Intent notification_intent = new Intent(context, Alert_Scheduling.class);
+        Intent notification_intent = new Intent(context, Home.class);
 
         PendingIntent content_intent = PendingIntent.getActivity(
                 context,
