@@ -4,16 +4,19 @@
     <item
         android:id="@+id/nav_back"
         android:icon="@android:drawable/ic_menu_revert"
+        style="@style/App.TextStyle.Body"
         android:title="Back" />
 
     <item
         android:id="@+id/nav_add"
         android:icon="@android:drawable/ic_input_add"
+        style="@style/App.TextStyle.Body"
         android:title="Add" />
 
     <item
         android:id="@+id/nav_logout"
         android:icon="@drawable/common_full_open_on_phone"
+        style="@style/App.TextStyle.Body"
         android:title="Logout" />
 
 </menu>

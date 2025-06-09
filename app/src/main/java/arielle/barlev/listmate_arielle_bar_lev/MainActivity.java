@@ -94,7 +94,6 @@ public class MainActivity extends AppCompatActivity {
                     utilities.make_snackbar(MainActivity.this, ex.getMessage());
                     return null;
                 });
-
             }
         });
     }

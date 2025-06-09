@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="23dp"
         android:textSize="16sp"
+        style="@style/App.TextStyle.Body"
         app:layout_constraintEnd_toStartOf="@+id/icon_share"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
