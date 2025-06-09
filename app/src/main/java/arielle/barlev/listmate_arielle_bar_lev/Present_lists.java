@@ -120,7 +120,6 @@ public class Present_lists extends Fragment {
                 int position = lists_names.indexOf(list_name);
                 if (position != -1 && position < lists_ids.size()) {
                     String list_id = lists_ids.get(position);
-                    utilities.make_snackbar(requireContext(), "Clicked List: " + list_name + " (ID: " + list_id + ")");
 
                     if (getActivity() instanceof Home) {
                         ((Home) getActivity()).load_fragment(new Present_Items(), Uid, list_id);
@@ -141,7 +140,6 @@ public class Present_lists extends Fragment {
                 int position = lists_names.indexOf(list_name);
                 if (position != -1 && position < lists_ids.size()) {
                     String list_id = lists_ids.get(position);
-                    utilities.make_snackbar(requireContext(), "Share: " + list_id);
 
                     Context context = requireContext();
 
@@ -163,7 +161,7 @@ public class Present_lists extends Fragment {
                             helper.share_list(list_id, user_id);
                             Toast.makeText(context, "List shared successfully!", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(context, "Please enter an item name", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "Please enter an user's email", Toast.LENGTH_SHORT).show();
                         }
                     });
                     alert_dialog_builder.create().show();
@@ -189,12 +187,6 @@ public class Present_lists extends Fragment {
                             selected_year = year;
                             selected_month = month;
                             selected_day = day_of_month;
-
-                            Toast.makeText(
-                                    requireContext(),
-                                    "Date: " + selected_day + "/" + (selected_month + 1) + "/" + selected_year,
-                                    Toast.LENGTH_LONG
-                            ).show();
 
                             show_time_dialog(scheduling_list_name);
                         },
@@ -297,10 +289,6 @@ public class Present_lists extends Fragment {
                 is_fetching_data.set(false);
                 return null;
             });
-        } else {
-            if (requireContext() != null) {
-                utilities.make_snackbar(requireContext(), "fetch_display_data() - already fetching data, skipping");
-            }
         }
     }
 
@@ -314,13 +302,7 @@ public class Present_lists extends Fragment {
                 (v, hour_of_day, minute) -> {
                     selected_hour = hour_of_day;
                     selected_minute = minute;
-    
-                    Toast.makeText(
-                            requireContext(),
-                            "Time: " + selected_hour + ":" + selected_minute,
-                            Toast.LENGTH_LONG
-                    ).show();
-    
+
                     calendar.set(Calendar.HOUR_OF_DAY, selected_hour);
                     calendar.set(Calendar.MINUTE, selected_minute);
     

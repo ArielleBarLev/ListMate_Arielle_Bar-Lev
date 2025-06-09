@@ -96,7 +96,6 @@ public class Present_Items extends Fragment {
                 if (getContext() != null) {
                     if (listName != null) {
                         title.setText(listName);
-                        utilities.make_snackbar(getContext(), "Retrieved list name: " + listName);
                     } else {
                         utilities.make_snackbar(getContext(), "List name not found for ID: " + list_id);
                     }
@@ -211,7 +210,6 @@ public class Present_Items extends Fragment {
         adapter.setOnTrashClickListener(item -> {
             helper.delete_item(list_id, item);
             adapter.deleteItem(item);
-            utilities.make_snackbar(getContext(), "Item deleted.");
         });
 
         adapter.setOnCircleClickListener(item -> {
@@ -222,9 +220,6 @@ public class Present_Items extends Fragment {
                     adapter.notifyItemChanged(i);
                     break;
                 }
-            }
-            if (getContext() != null) {
-                utilities.make_snackbar(getContext(), "Item status updated.");
             }
         });
     }
