@@ -48,7 +48,7 @@ public class Lists_Names_Adapter extends RecyclerView.Adapter<Lists_Names_Adapte
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list, parent, false);
         return new ViewHolder(view);
     }
 
