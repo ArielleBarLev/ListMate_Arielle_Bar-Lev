@@ -126,8 +126,4 @@ public class Home extends AppCompatActivity {
         fragment_transaction.addToBackStack(null);
         fragment_transaction.commit();
     }
-
-    private void logout() {
-        //TODO: complete
-    }
 }

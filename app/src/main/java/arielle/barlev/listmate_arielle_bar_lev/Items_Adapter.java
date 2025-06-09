@@ -45,31 +45,6 @@ public class Items_Adapter extends RecyclerView.Adapter<Items_Adapter.ViewHolder
         _circleClickListener = listener;
     }
 
-    public void updateItemValue(String itemName, boolean newValue) {
-        for (int i = 0; i < _items_list.size(); i++) {
-            if (_items_list.get(i).getKey().equals(itemName)) {
-                _items_list.set(i, new Map.Entry<String, Boolean>() {
-                    @Override
-                    public String getKey() {
-                        return itemName;
-                    }
-
-                    @Override
-                    public Boolean getValue() {
-                        return newValue;
-                    }
-
-                    @Override
-                    public Boolean setValue(Boolean value) {
-                        return null;
-                    }
-                });
-                notifyItemChanged(i);
-                break;
-            }
-        }
-    }
-
     // Method to update the item's name locally
     public void updateItemName(String oldItemName, String newItemName) {
         for (int i = 0; i < _items_list.size(); i++) {

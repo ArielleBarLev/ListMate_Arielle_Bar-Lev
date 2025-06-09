@@ -156,7 +156,7 @@ public class Firebase_Helper {
                 add_user_realtime_database(email);
             } else {
                 Exception exception = task.getException();
-                String errorMessage = "Login failed: " + (exception != null ? exception.getMessage() : "Unknown error");
+                String errorMessage = "Register: " + (exception != null ? exception.getMessage() : "Unknown error");
                 future.completeExceptionally(new Exception(errorMessage));
             }
         });

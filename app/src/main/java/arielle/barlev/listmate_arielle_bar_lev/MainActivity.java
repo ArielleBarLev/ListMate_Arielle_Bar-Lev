@@ -2,7 +2,6 @@ package arielle.barlev.listmate_arielle_bar_lev;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
     private Firebase_Helper helper;
     private Utilities utilities;
 
-    private void init_component() {
+    private void init() {
         email = findViewById(R.id.email);
         password = findViewById(R.id.password);
 
@@ -38,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        init_component();
+        init();
 
         sign_up.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("Uid", uid);
                     startActivity(intent);
                 }).exceptionally(ex -> {
-                    Log.e("LoginActivity", "Login error: " + ex.getMessage());
                     utilities.make_snackbar(MainActivity.this, ex.getMessage());
                     return null;
                 });
@@ -90,7 +88,6 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("Uid", uid);
                     startActivity(intent);
                 }).exceptionally(ex -> {
-                    Log.e("LoginActivity", "Login error: " + ex.getMessage());
                     utilities.make_snackbar(MainActivity.this, ex.getMessage());
                     return null;
                 });

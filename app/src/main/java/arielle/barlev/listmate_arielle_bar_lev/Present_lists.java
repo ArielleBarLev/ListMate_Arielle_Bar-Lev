@@ -390,6 +390,5 @@ public class Present_lists extends Fragment {
                 notification_manager.createNotificationChannel(channel);
             }
         }
-}
-
+    }
 }
