@@ -59,9 +59,6 @@ public class Add_List extends Fragment {
 
                 if (getParentFragmentManager().getBackStackEntryCount() > 0) {
                     getParentFragmentManager().popBackStack();
-                    utilities.make_snackbar(requireContext(), "List created!");
-                } else {
-                    utilities.make_snackbar(requireContext(), "List created! Please navigate back.");
                 }
             }
         });
@@ -70,14 +67,10 @@ public class Add_List extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        // This is called when the fragment is attached to its host activity.
-        // You can get a reference to the activity here if needed for direct communication.
     }
 
-    // Changed: Optional: Override onDetach to release context reference
     @Override
     public void onDetach() {
         super.onDetach();
-        // This is called when the fragment is detached from its host activity.
     }
 }

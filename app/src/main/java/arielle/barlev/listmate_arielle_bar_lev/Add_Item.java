@@ -56,7 +56,7 @@ public class Add_Item extends Fragment {
                 String item_content = item.getText().toString().trim();
 
                 if (item_content.isEmpty()) {
-                    utilities.make_snackbar(requireContext(), "List name cannot be empty.");
+                    utilities.make_snackbar(requireContext(), "Field is empty");
                     return;
                 }
 
@@ -64,9 +64,6 @@ public class Add_Item extends Fragment {
 
                 if (getParentFragmentManager().getBackStackEntryCount() > 0) {
                     getParentFragmentManager().popBackStack();
-                    utilities.make_snackbar(requireContext(), "Item added!");
-                } else {
-                    utilities.make_snackbar(requireContext(), "Item! Please navigate back.");
                 }
             }
         });

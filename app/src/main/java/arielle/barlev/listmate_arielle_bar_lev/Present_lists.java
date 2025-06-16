@@ -158,10 +158,27 @@ public class Present_lists extends Fragment {
                     alert_dialog_builder.setPositiveButton("Ok", (dialog, which) -> {
                         String user_id = text_box.getText().toString().trim();
                         if (!user_id.isEmpty()) {
-                            helper.share_list(list_id, user_id);
-                            Toast.makeText(context, "List shared successfully!", Toast.LENGTH_SHORT).show();
+                            helper.share_list(list_id, user_id).thenAccept(success -> {
+                                if (isAdded()) {
+                                    requireActivity().runOnUiThread(() -> {
+                                        if (success) {
+                                            Toast.makeText(requireContext(), "List shared successfully!", Toast.LENGTH_LONG).show();
+                                        } else {
+                                            Toast.makeText(context, "List share failed", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+                            }).exceptionally(ex -> {
+                                if (isAdded()) {
+                                    requireActivity().runOnUiThread(() -> {
+                                        utilities.make_snackbar(requireContext(), ex.getMessage());
+                                    });
+                                }
+
+                                return null;
+                            });
                         } else {
-                            Toast.makeText(context, "Please enter an user's email", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), "Please enter an user's email", Toast.LENGTH_LONG).show();
                         }
                     });
                     alert_dialog_builder.create().show();
@@ -231,7 +248,6 @@ public class Present_lists extends Fragment {
                                 lists_names.clear();
                                 lists_ids.clear();
                                 adapter.notifyDataSetChanged();
-                                utilities.make_snackbar(requireContext(), "No lists found for this user.");
                             }
                             is_fetching_data.set(false);
                         });

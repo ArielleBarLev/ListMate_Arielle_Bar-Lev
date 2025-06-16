@@ -382,14 +382,12 @@ public class Firebase_Helper {
                         _utilities.make_snackbar(_context, "Error toggling off '" + item + "' in list '" + list_id + "': " + e.getMessage());
                     });
                 } else {
-                    // Handle case where the item doesn't exist (optional logging)
                     _utilities.make_snackbar(_context, "Warning: Item '" + item + "' not found in list '" + list_id + "'");
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // Handle error during read (optional logging)
                 _utilities.make_snackbar(_context, "Error fetching item data for toggle: " + error.getMessage());
             }
         });
@@ -420,9 +418,12 @@ public class Firebase_Helper {
     /*
         A function to share list with other user
         Input: list's id, user's email
-        Return value: none
+        Return value: Boolean - whether the share succeed or not
      */
-    public void share_list(String list_id, String email) {
+    public CompletableFuture<Boolean> share_list(String list_id, String email) {
+
+        CompletableFuture<Boolean> results_future = new CompletableFuture<>();
+
         DatabaseReference users_reference = _database.getReference("users");
 
         CompletableFuture<String> future = get_user_id(email);
@@ -431,17 +432,19 @@ public class Firebase_Helper {
             if (user_id != null) {
                 users_reference.child(user_id).child("lists").child(list_id).setValue(false)
                         .addOnSuccessListener(aVoid -> {
-                            _utilities.make_snackbar(_context, "succeed");
+                            results_future.complete(true);
                         })
                         .addOnFailureListener(e -> {
-                            _utilities.make_snackbar(_context, "fail");
+                            results_future.complete(false);
                         });
             } else {
-                _utilities.make_snackbar(_context, "Error: Could not retrieve id for email '" + email + "'");
+                results_future.complete(false);
             }
         }).exceptionally(ex -> {
-            _utilities.make_snackbar(_context, "Error share list '" + list_id + "': " + ex.getMessage());
+            results_future.complete(false);
             return null;
         });
+
+        return results_future;
     }
 }

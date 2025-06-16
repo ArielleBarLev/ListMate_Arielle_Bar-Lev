@@ -79,13 +79,11 @@ public class MainActivity extends AppCompatActivity {
                 CompletableFuture<String> sign_up_future = helper.sign_up(email_content, password_content);
 
                 sign_up_future.thenAccept(uid -> {
-                    utilities.make_snackbar(MainActivity.this, uid);
-
                     Intent intent = new Intent(MainActivity.this, Home.class);
                     intent.putExtra("Uid", uid);
                     startActivity(intent);
                 }).exceptionally(ex -> {
-                    utilities.make_snackbar(MainActivity.this, ex.getMessage());
+                    utilities.make_snackbar(MainActivity.this, "User already exists");
                     return null;
                 });
 
@@ -107,13 +105,11 @@ public class MainActivity extends AppCompatActivity {
                 CompletableFuture<String> login_future = helper.login(email_content, password_content);
 
                 login_future.thenAccept(uid -> {
-                    utilities.make_snackbar(MainActivity.this, "success");
-
                     Intent intent = new Intent(MainActivity.this, Home.class);
                     intent.putExtra("Uid", uid);
                     startActivity(intent);
                 }).exceptionally(ex -> {
-                    utilities.make_snackbar(MainActivity.this, ex.getMessage());
+                    utilities.make_snackbar(MainActivity.this, "Login failed, please try again");
                     return null;
                 });
             }
@@ -154,8 +150,6 @@ public class MainActivity extends AppCompatActivity {
         editor.putString(KEY_PASSWORD, password);
 
         editor.apply();
-
-        apply_settings(email, password);
 
         Toast.makeText(MainActivity.this, "Settings saved successfully!", Toast.LENGTH_SHORT).show();
     }
