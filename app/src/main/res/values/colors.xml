@@ -27,4 +27,6 @@
     <color name="html_textbox_focus_gradient_start">#eac4f9</color>
     <color name="html_textbox_focus_gradient_end">#c8a7f0</color>
     <color name="html_textbox_focus_shadow_color">#66c8a7f0</color>
+
+    <color name="snackbar_background_custom">#4B2D91</color>
 </resources>

@@ -3,6 +3,7 @@ package arielle.barlev.listmate_arielle_bar_lev;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -73,6 +74,16 @@ public class MainActivity extends AppCompatActivity {
 
                 if (email_content.isEmpty() || password_content.isEmpty()) {
                     utilities.make_snackbar(MainActivity.this, "Fields are empty");
+                    return;
+                }
+
+                if (!Patterns.EMAIL_ADDRESS.matcher(email_content).matches()) {
+                    utilities.make_snackbar(MainActivity.this, "Please enter a valid email address.");
+                    return;
+                }
+
+                if (password_content.length() < 6) {
+                    utilities.make_snackbar(MainActivity.this, "Password needs to be at least 6 chars long");
                     return;
                 }
 
